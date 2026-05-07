@@ -1,16 +1,44 @@
-# React + Vite
+# 🌙 SleepWell Ultimate: IoT Smart Nightlight
+> ⚠️ **CATATAN**: Website ini adalah versi uji coba (Coba-Coba) untuk keperluan pengembangan dan lomba.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SleepWell adalah sistem lampu tidur pintar berbasis IoT yang dirancang untuk membantu pencegahan nyamuk menggunakan frekuensi ultrasonik dan spektrum cahaya khusus, sekaligus memonitor kondisi ruangan secara real-time.
 
-Currently, two official plugins are available:
+## 🚀 Cara Menjalankan Sistem (Localhost)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Sistem ini sekarang terintegrasi dalam satu repository. Ikuti langkah berikut:
 
-## React Compiler
+### 1. Backend (Node.js)
+*   Buka terminal di folder `backend`.
+*   Jalankan perintah:
+    ```bash
+    npm install
+    npm start
+    ```
+*   Server berjalan di `http://localhost:3000`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. Frontend (React + Vite)
+*   Buka terminal di folder root (`SleepWell-Website`).
+*   Jalankan perintah:
+    ```bash
+    npm install
+    npm run dev
+    ```
+*   Buka dashboard di: `http://localhost:5173`.
+*   **Login Password**: `admin`
 
-## Expanding the ESLint configuration
+### 3. Firmware (ESP32)
+*   File kodingan ada di folder `esp/inkubator_dummy/`.
+*   Buka menggunakan Arduino IDE, install library `PubSubClient`, `ArduinoJson`, `WiFiManager`, dan `DHT sensor library`.
+*   Upload ke board ESP32 kamu.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🛠️ Fitur "Gacor" SleepWell
+*   **Real-time Sensor Hub**: Monitoring 6x Ultrasonik + 1x DHT Suhu secara bersamaan.
+*   **Smart Automation**: Lampu dengan preset warna anti-nyamuk.
+*   **Security Login**: Dashboard aman dengan proteksi password.
+*   **Remote Settings**: Fitur ganti WiFi ESP32 langsung dari halaman dashboard.
+*   **Hardware Heartbeat**: Indikator status koneksi fisik alat (Online/Offline).
+
+---
+*Dibuat oleh Tim SleepWell (fanTaux & alvinrw).*

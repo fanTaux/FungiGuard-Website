@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inkubator Smart Dashboard</title>
+  <meta name="description" content="Sistem monitoring inkubator ayam berbasis IoT dengan ESP32 dan MQTT">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">🐣</div>
+        <div>
+          <h1 class="logo-title">Inkubator Ayam</h1>
+          <p class="logo-sub">Smart Monitoring System</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="time-badge" id="timeBadge">--:--:--</div>
+        <div class="mqtt-status" id="mqttStatusBadge">
+          <span class="status-dot" id="statusDot"></span>
+          <span class="status-text" id="statusText">Menghubungkan...</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN ===== -->
+  <main class="container">
+
+    <!-- ROW 1: Kontrol Sistem -->
+    <div class="card system-card">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-icon">⚡</span>
+          <div>
+            <div class="card-title">Kontrol Sistem</div>
+            <div class="card-sub">Master power inkubator</div>
+          </div>
+        </div>
+        <div class="system-toggle-wrapper">
+          <span class="toggle-label" id="sysLabel">SISTEM OFF</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="systemToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      <div class="system-badge" id="sysBadge">
+        <span id="sysBadgeText">● OFFLINE</span>
+      </div>
+    </div>
+
+    <!-- ROW 2: Sensor Grid -->
+    <div class="card">
+      <div class="card-header" style="margin-bottom:18px;">
+        <div class="card-title-group">
+          <span class="card-icon">📡</span>
+          <div>
+            <div class="card-title">Monitoring Jarak Ultrasonik</div>
+            <div class="card-sub">5 sensor HC-SR04 aktif</div>
+          </div>
+        </div>
+        <div class="section-badge" id="sensorUpdateBadge">Menunggu data...</div>
+      </div>
+      <div class="sensor-grid" id="sensorGrid">
+        <!-- Diisi oleh JS -->
+      </div>
+    </div>
+
+    <!-- ROW 3: PWM LED -->
+    <div class="card">
+      <div class="card-header" style="margin-bottom:18px;">
+        <div class="card-title-group">
+          <span class="card-icon">💡</span>
+          <div>
+            <div class="card-title">Kontrol Kecerahan Lampu</div>
+            <div class="card-sub">PWM 0–255 per channel</div>
+          </div>
+        </div>
+      </div>
+      <div class="led-grid">
+
+        <!-- LED Hijau -->
+        <div class="led-card" id="ledCardHijau">
+          <div class="led-visual">
+            <div class="led-glow hijau" id="ledGlowHijau"></div>
+            <div class="led-bulb hijau" id="ledBulbHijau"></div>
+          </div>
+          <div class="led-info">
+            <span class="led-name">Lampu Hijau</span>
+            <span class="led-channel">CH·0 · GPIO 25</span>
+            <div class="pwm-slider-wrap">
+              <input type="range" min="0" max="255" value="0" class="pwm-slider slider-hijau" id="bright_hijau"
+                oninput="changeBrightness('hijau', this.value)">
+              <span class="led-val" id="val_hijau">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- LED Biru -->
+        <div class="led-card" id="ledCardBiru">
+          <div class="led-visual">
+            <div class="led-glow biru" id="ledGlowBiru"></div>
+            <div class="led-bulb biru" id="ledBulbBiru"></div>
+          </div>
+          <div class="led-info">
+            <span class="led-name">Lampu Biru</span>
+            <span class="led-channel">CH·1 · GPIO 26</span>
+            <div class="pwm-slider-wrap">
+              <input type="range" min="0" max="255" value="0" class="pwm-slider slider-biru" id="bright_biru"
+                oninput="changeBrightness('biru', this.value)">
+              <span class="led-val" id="val_biru">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- LED Kuning -->
+        <div class="led-card" id="ledCardKuning">
+          <div class="led-visual">
+            <div class="led-glow kuning" id="ledGlowKuning"></div>
+            <div class="led-bulb kuning" id="ledBulbKuning"></div>
+          </div>
+          <div class="led-info">
+            <span class="led-name">Lampu Kuning</span>
+            <span class="led-channel">CH·2 · GPIO 27</span>
+            <div class="pwm-slider-wrap">
+              <input type="range" min="0" max="255" value="0" class="pwm-slider slider-kuning" id="bright_kuning"
+                oninput="changeBrightness('kuning', this.value)">
+              <span class="led-val" id="val_kuning">0%</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ROW 4: WiFi Settings -->
+    <div class="card wifi-card">
+      <div class="card-header" style="margin-bottom:20px;">
+        <div class="card-title-group">
+          <span class="card-icon">📶</span>
+          <div>
+            <div class="card-title">Pengaturan WiFi Alat</div>
+            <div class="card-sub">Ubah jaringan atau reset koneksi</div>
+          </div>
+        </div>
+      </div>
+      <div class="wifi-form">
+        <div class="form-group">
+          <label for="wifiSsid">Nama WiFi (SSID)</label>
+          <input type="text" id="wifiSsid" placeholder="Masukkan SSID baru...">
+        </div>
+        <div class="form-group">
+          <label for="wifiPass">Password WiFi</label>
+          <input type="password" id="wifiPass" placeholder="Masukkan Password baru...">
+        </div>
+        <div class="wifi-actions">
+          <button class="btn-save" onclick="updateWifi()">💾 Simpan & Restart</button>
+          <button class="btn-reset" onclick="resetWifiDevice()">🔄 Reset WiFi</button>
+        </div>
+      </div>
+      <p class="wifi-note">⚠️ Alat akan restart otomatis dan berkedip 3× saat perintah diterima.</p>
+    </div>
+
+    <!-- ROW 5: Log MQTT -->
+    <div class="card">
+      <div class="card-header" style="margin-bottom:12px;">
+        <div class="card-title-group">
+          <span class="card-icon">📜</span>
+          <div class="card-title">Log Aktivitas MQTT</div>
+        </div>
+        <button class="btn-clear" onclick="clearLog()">Bersihkan</button>
+      </div>
+      <div class="log-box" id="logBox">
+        <p class="log-placeholder">Dashboard diinisialisasi. Menunggu koneksi...</p>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 Inkubator Smart System &mdash; ESP32 + HiveMQ Cloud</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
