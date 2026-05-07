@@ -26,6 +26,12 @@ Sistem ini sekarang terintegrasi dalam satu repository. Ikuti langkah berikut:
 *   Buka dashboard di: `http://localhost:5173`.
 *   **Login Password**: `admin`
 
+### 4. Legacy Web Version (Opsional)
+Jika ingin menjalankan web versi lama (HTML/JS statis):
+*   Masuk ke folder `web`.
+*   Jalankan perintah: `python -m http.server 8000`.
+*   Buka di browser: `http://localhost:8000`.
+
 ### 3. Firmware (ESP32)
 *   File kodingan ada di folder `esp/inkubator_dummy/`.
 *   Buka menggunakan Arduino IDE, install library `PubSubClient`, `ArduinoJson`, `WiFiManager`, dan `DHT sensor library`.
