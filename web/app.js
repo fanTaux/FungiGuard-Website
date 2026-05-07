@@ -122,7 +122,7 @@ const ESP_TIMEOUT_MS = 15000; // 15 detik = dianggap mati
 function initSensorCards() {
   const grid = document.getElementById('sensorGrid');
   grid.innerHTML = '';
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 6; i++) {
     grid.insertAdjacentHTML('beforeend', `
       <div class="sensor-card" id="sensorCard${i}">
         <div class="sensor-card-top">
@@ -143,7 +143,7 @@ function initSensorCards() {
     const now = Date.now();
     
     // 1. Cek Sensor Individu
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 6; i++) {
       if (!sensorLastSeen[i]) continue;
       if (now - sensorLastSeen[i] > ESP_TIMEOUT_MS) {
         setSensorStatus(i, 'timeout');
@@ -291,6 +291,9 @@ function connectMQTT() {
 // ============================================================
 function handleSensorData(data) {
   espLastSeen = Date.now(); // ESP32 is alive!
+  if (data.dht) {
+    addLog('info', 'DHT', `Suhu: ${data.dht.temperature}°C, Lembap: ${data.dht.humidity}%`);
+  }
   if (!data.sensors || !Array.isArray(data.sensors)) return;
   if (data.system === false && systemOn) {
     systemOn = false;
