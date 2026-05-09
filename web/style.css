@@ -102,6 +102,59 @@ body {
 
 .header-right { display: flex; align-items: center; gap: 10px; }
 
+.device-selector-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.device-selector-wrap label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--text-3);
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+
+.select-group {
+  display: flex;
+  gap: 4px;
+}
+
+#deviceSelect {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 0.77rem;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  cursor: pointer;
+}
+
+.btn-add-device {
+  background: var(--amber-g);
+  border: 1px solid rgba(245,158,11,0.2);
+  color: var(--amber);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+}
+
+.btn-add-device:hover {
+  background: var(--amber);
+  color: #0c0e14;
+  transform: scale(1.1);
+}
+
 .time-badge {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.8rem;

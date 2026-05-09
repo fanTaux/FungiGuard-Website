@@ -52,7 +52,11 @@ const char* mqtt_server   = "4ecff5933a704e218192a9a9390c3580.s1.eu.hivemq.cloud
 const int   mqtt_port     = 8883;
 const char* mqtt_username = "ayamA";
 const char* mqtt_password = "Al280805.";
-const char* mqtt_topic    = "doc/data";
+const char* mqtt_base_topic = "doc/data";
+
+// --- SETTING ID PERANGKAT DISINI ---
+String myDeviceID = "kamar-01"; 
+// -----------------------------------
 
 String TOPIC_SENSOR, TOPIC_STATUS, TOPIC_CONTROL;
 bool systemOn = true;
@@ -158,10 +162,20 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 void TaskMQTTCode(void * pvParameters) {
   for(;;) {
     if (!mqttClient.connected()) {
-      if (mqttClient.connect("esp32_inkubator", mqtt_username, mqtt_password)) {
+      Serial.print("[MQTT] Menghubungkan ulang ke broker dengan ID: ");
+      Serial.println(myDeviceID);
+      
+      String clientId = "ESP32-" + myDeviceID;
+      if (mqttClient.connect(clientId.c_str(), mqtt_username, mqtt_password)) {
+        Serial.println("[MQTT] ✅ TERHUBUNG!");
         mqttClient.subscribe(TOPIC_CONTROL.c_str());
         publishStatus();
-      } else { vTaskDelay(5000 / portTICK_PERIOD_MS); }
+      } else {
+        Serial.print("[MQTT] ❌ GAGAL, rc=");
+        Serial.print(mqttClient.state());
+        Serial.println(" (Coba lagi dalam 5 detik)");
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
+      }
     }
     xSemaphoreTake(mqttMutex, portMAX_DELAY);
     mqttClient.loop();
@@ -175,6 +189,9 @@ void TaskSensorCode(void * pvParameters) {
     if (systemOn) {
       StaticJsonDocument<768> doc;
       doc["system"] = true;
+      doc["bright_hijau"] = brightHijau;
+      doc["bright_biru"] = brightBiru;
+      doc["bright_kuning"] = brightKuning;
       
       // Data DHT (Suhu & Kelembapan)
       JsonObject dhtData = doc.createNestedObject("dht");
@@ -233,13 +250,27 @@ void setup() {
   Serial.println("[DUMMY] Mode sensor aktif: data sensor disimulasi.");
 #endif
 
-  
-  TOPIC_SENSOR = String(mqtt_topic) + "/sensor";
-  TOPIC_STATUS = String(mqtt_topic) + "/status";
-  TOPIC_CONTROL = String(mqtt_topic) + "/control";
+  // Membuat jalur topik dinamis berdasarkan ID
+  TOPIC_SENSOR  = String(mqtt_base_topic) + "/" + myDeviceID + "/sensor";
+  TOPIC_STATUS  = String(mqtt_base_topic) + "/" + myDeviceID + "/status";
+  TOPIC_CONTROL = String(mqtt_base_topic) + "/" + myDeviceID + "/control";
+
+  Serial.println("================================");
+  Serial.println("ID ALAT INI: " + myDeviceID);
+  Serial.println("================================");
 
   mqttMutex = xSemaphoreCreateMutex();
-  wm.autoConnect("Inkubator-Setup", "password123");
+  
+  // Nama Hotspot unik agar tidak tabrakan saat setup banyak alat
+  String apName = "Inkubator-" + myDeviceID;
+  Serial.println("[WiFi] Mencoba konek... Jika gagal, buka Hotspot: " + apName);
+  
+  if (!wm.autoConnect(apName.c_str(), "password123")) {
+    Serial.println("[WiFi] ❌ Gagal konek dan timeout portal.");
+    ESP.restart();
+  }
+  
+  Serial.println("[WiFi] ✅ Terhubung ke Internet!");
   secureClient.setInsecure();
   mqttClient.setServer(mqtt_server, mqtt_port);
   mqttClient.setCallback(mqttCallback);

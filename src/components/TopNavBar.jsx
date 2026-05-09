@@ -1,4 +1,9 @@
+import { useAppContext } from '../context/AppContext';
+
 export default function TopNavBar() {
+    const { devices, activeDeviceId, setActiveDeviceId } = useAppContext();
+    const deviceIds = Object.keys(devices);
+
     return (
         <header className="fixed top-0 w-full z-50 flex justify-between items-center px-margin h-16 bg-surface/60 backdrop-blur-md shadow-sm">
             <div className="flex items-center gap-base">
@@ -7,12 +12,27 @@ export default function TopNavBar() {
             </div>
             <div className="flex items-center gap-md">
                 <div className="hidden md:flex items-center gap-gutter">
-                    <button className="text-primary font-bold border-b-2 border-primary font-label-lg text-label-lg py-1">Room Selector</button>
+                    <span className="text-primary font-bold border-b-2 border-primary font-label-lg text-label-lg py-1">Room Selector</span>
                 </div>
-                <div className="flex items-center gap-sm bg-surface-container-low px-sm py-1.5 rounded-full cursor-pointer hover:bg-surface-container-high transition-colors">
-                    <span className="font-label-lg text-label-lg text-on-surface-variant">Kamar Adik</span>
-                    <span className="material-symbols-outlined text-outline">expand_more</span>
+                
+                <div className="relative">
+                    <select 
+                        value={activeDeviceId || ''}
+                        onChange={(e) => setActiveDeviceId(e.target.value)}
+                        className="appearance-none bg-surface-container-low pl-4 pr-10 py-1.5 rounded-full cursor-pointer hover:bg-surface-container-high transition-colors font-label-lg text-label-lg text-[#624633] font-bold focus:outline-none focus:ring-2 focus:ring-[#d8a878]"
+                    >
+                        {deviceIds.length === 0 && <option value="">Tidak ada alat</option>}
+                        {deviceIds.map(id => (
+                            <option key={id} value={id}>
+                                {id.includes('inkubator') ? `Inkubator (${id.slice(-4)})` : id}
+                            </option>
+                        ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <span className="material-symbols-outlined text-outline text-sm">expand_more</span>
+                    </div>
                 </div>
+
                 <div className="flex items-center gap-sm">
                     <button className="p-2 rounded-full hover:bg-surface-container-low transition-colors relative">
                         <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
