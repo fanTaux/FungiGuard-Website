@@ -91,12 +91,16 @@ function MainApp() {
             </div>
             
             <DashboardMetrics />
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg mt-6">
-              <div className="lg:col-span-7 space-y-lg">
-                <ControlPanel />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg mt-6 items-stretch">
+              <div className="lg:col-span-7 flex flex-col">
+                <div className="flex-1">
+                  <ControlPanel />
+                </div>
               </div>
-              <div className="lg:col-span-5 space-y-lg">
-                <PowerControl />
+              <div className="lg:col-span-5 flex flex-col">
+                <div className="flex-1">
+                  <PowerControl />
+                </div>
               </div>
             </div>
             <div className="mt-8">
