@@ -101,7 +101,7 @@ export default function Analytics() {
                 </section>
 
                 {/* BAGIAN INFO (KANAN) */}
-                <div className="space-y-6">
+                <div className="flex flex-col gap-6 h-full">
                     {/* Skor Kualitas Tidur */}
                     <section className="bg-gradient-to-br from-[#5c6b54] to-[#4a5743] rounded-3xl p-6 border border-[#4a5743] shadow-md text-white relative overflow-hidden">
                         <div className="absolute -right-6 -top-6 text-white/10">
@@ -127,7 +127,7 @@ export default function Analytics() {
                     </section>
 
                     {/* Estimasi Konsumsi Energi */}
-                    <section className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between h-[calc(100%-14rem)] min-h-[220px]">
+                    <section className="flex-1 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between min-h-[220px]">
                         <div>
                             <div className="flex items-center gap-2 mb-1">
                                 <span className="material-symbols-outlined text-[#d4a373] text-lg">bolt</span>
