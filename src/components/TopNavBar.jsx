@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import AlertHistory from './AlertHistory';
 
-export default function TopNavBar() {
+export default function TopNavBar({ onProfileClick }) {
     const { devices, activeDeviceId, setActiveDeviceId } = useAppContext();
     const [showNotifications, setShowNotifications] = useState(false);
     const notifRef = useRef(null);
@@ -67,9 +67,12 @@ export default function TopNavBar() {
                             </div>
                         )}
                     </div>
-                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed shadow-sm">
+                    <button 
+                        onClick={onProfileClick}
+                        className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed shadow-sm hover:opacity-80 transition-opacity cursor-pointer"
+                    >
                         <img alt="User Profile Avatar" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDu1VX7-YQC8e-JmHClPrC0FHyGKrm1Iz3fuyyaXcSWp5x-pPsrTrauHZodbb5B-0fH2v5HSBWjvDnq4oo46I9Wg7NRqX7BQzHq9jw1Ee8sb8zNAkhteFoP6sfYnX9KGpRZdF7VHtWttpcFlX8gW4Zxn5pEPpIhC0Pxnhp35teXMpW7LybzJJQxv9WceWVtpizTHgy7FUOs5YTY6EolIxyiLwMulhzJz_HUr7-qxKElOI0uhlhe069kwNHOc9OYN6Z9pi5An4I1jQ" />
-                    </div>
+                    </button>
                 </div>
             </div>
         </header>

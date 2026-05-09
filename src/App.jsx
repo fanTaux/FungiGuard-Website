@@ -10,6 +10,7 @@ import AlertHistory from './components/AlertHistory';
 import BottomNavBar from './components/BottomNavBar';
 import Login from './components/Login';
 import SettingsPage from './components/SettingsPage';
+import ProfilePage from './components/ProfilePage';
 import { AppProvider, useAppContext } from './context/AppContext';
 
 function MainApp() {
@@ -27,7 +28,7 @@ function MainApp() {
 
   return (
     <>
-      <TopNavBar onLogout={logout} />
+      <TopNavBar onLogout={logout} onProfileClick={() => setActiveTab('profile')} />
       
       {/* Top Navigation Tabs */}
       <div className="pt-20 px-margin max-w-7xl mx-auto mb-6">
@@ -124,6 +125,10 @@ function MainApp() {
 
         {activeTab === 'settings' && (
           <SettingsPage />
+        )}
+
+        {activeTab === 'profile' && (
+          <ProfilePage />
         )}
 
       </main>
