@@ -183,6 +183,28 @@
       </div>
     </div>
 
+    <!-- ROW 6: Manajemen Perangkat -->
+    <div class="card">
+      <div class="card-header" style="margin-bottom:20px;">
+        <div class="card-title-group">
+          <span class="card-icon">🎛️</span>
+          <div>
+            <div class="card-title">Manajemen Perangkat</div>
+            <div class="card-sub">Pilih alat yang ingin dipantau atau tambahkan ID secara manual</div>
+          </div>
+        </div>
+      </div>
+      <div class="wifi-form" style="display: flex; gap: 10px; align-items: flex-end;">
+        <div class="form-group" style="flex: 2;">
+          <label for="deviceSelect">Alat Aktif</label>
+          <select id="deviceSelect" style="background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text-1); font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; outline: none; width: 100%;">
+            <option value="">-- Menunggu / Pilih Alat --</option>
+          </select>
+        </div>
+        <button class="btn-save" onclick="manualAddDevice()" style="flex: 1; padding: 12px; height: 46px;">+ Tambah Manual</button>
+      </div>
+    </div>
+
   </main>
 
   <footer class="footer">

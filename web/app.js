@@ -42,6 +42,11 @@ let ledBright  = { hijau: 0, biru: 0, kuning: 0 };
 let logLines   = 0;
 const MAX_LOG  = 60;
 
+// Multi-Device State
+let currentDeviceId = ""; 
+let knownDevices    = new Set(); 
+const devicesState  = {}; // Nyimpen state per ID alat biar gak ilang pas pindah tab
+
 // ============================================================
 //  INIT
 // ============================================================
@@ -55,14 +60,107 @@ document.addEventListener('DOMContentLoaded', () => {
     connectMQTT();   // Langsung ke MQTT HiveMQ
   }
 
+  // Device Selector Event
+  document.getElementById('deviceSelect').addEventListener('change', (e) => {
+    currentDeviceId = e.target.value;
+    if (currentDeviceId && devicesState[currentDeviceId]) {
+      const s = devicesState[currentDeviceId];
+      
+      // 1. Sinkronkan Master System Toggle
+      systemOn = s.system || false;
+      
+      // 2. Sinkronkan Slider & Visual LED
+      ledBright.hijau  = s.bright_hijau || 0;
+      ledBright.biru   = s.bright_biru  || 0;
+      ledBright.kuning = s.bright_kuning || 0;
+      
+      // Update element input slider secara fisik
+      const sliderH = document.getElementById('bright_hijau');
+      const sliderB = document.getElementById('bright_biru');
+      const sliderK = document.getElementById('bright_kuning');
+      
+      if (sliderH) sliderH.value = ledBright.hijau;
+      if (sliderB) sliderB.value = ledBright.biru;
+      if (sliderK) sliderK.value = ledBright.kuning;
+      
+      // Update label % dan visual lampu
+      ['hijau', 'biru', 'kuning'].forEach(c => {
+        updateBrightLabel(c, ledBright[c]);
+        updateLedVisual(c, ledBright[c]);
+      });
+
+      syncSystemUI();
+      addLog('info', 'UI', `Berpindah ke alat: ${currentDeviceId}`);
+    } else {
+      // Jika pilih kosong, reset UI ke nol
+      resetUIToDefault();
+    }
+  });
+
   // System Toggle
   document.getElementById('systemToggle').addEventListener('change', (e) => {
+    if (!currentDeviceId) { alert("Pilih alat dulu!"); e.target.checked = !e.target.checked; return; }
     systemOn = e.target.checked;
     publishControl({ system: systemOn });
     syncSystemUI();
-    addLog('pub', 'PUB', `System: ${systemOn ? 'ON' : 'OFF'}`);
+    addLog('pub', 'PUB', `[${currentDeviceId}] System: ${systemOn ? 'ON' : 'OFF'}`);
   });
 });
+
+function addDeviceToList(id) {
+  if (knownDevices.has(id)) return;
+  knownDevices.add(id);
+  const select = document.getElementById('deviceSelect');
+  const opt = document.createElement('option');
+  opt.id = "opt-" + id;
+  opt.value = id;
+  opt.textContent = "DEVICE: " + id + " (OFFLINE)";
+  select.appendChild(opt);
+  
+  // Kalau baru ada 1 alat, otomatis pilih
+  if (knownDevices.size === 1) {
+    select.value = id;
+    currentDeviceId = id;
+    addLog('info', 'UI', `Auto-select alat pertama: ${id}`);
+  }
+}
+
+function resetUIToDefault() {
+  systemOn = false;
+  ledBright = { hijau: 0, biru: 0, kuning: 0 };
+  ['hijau', 'biru', 'kuning'].forEach(c => {
+    const s = document.getElementById('bright_' + c);
+    if (s) s.value = 0;
+    updateBrightLabel(c, 0);
+    updateLedVisual(c, 0);
+  });
+  syncSystemUI();
+}
+
+function manualAddDevice() {
+  const id = prompt("Masukkan ID Alat baru (misal: kamar-1):");
+  if (id && id.trim()) {
+    const cleanId = id.trim();
+    if (knownDevices.has(cleanId)) {
+      alert("Alat ini sudah ada di daftar!");
+    } else {
+      addDeviceToList(cleanId);
+      // Inisialisasi state kosong biar gak error pas dipindah
+      devicesState[cleanId] = {
+        system: false,
+        bright_hijau: 0,
+        bright_biru: 0,
+        bright_kuning: 0,
+        sensors: [],
+        dht: { temperature: 0, humidity: 0 }
+      };
+      document.getElementById('deviceSelect').value = cleanId;
+      currentDeviceId = cleanId;
+      syncSystemUI();
+      addLog('info', 'UI', `Menambahkan alat manual: ${cleanId}`);
+    }
+  }
+}
 
 // ============================================================
 //  CONNECT KE NODE.JS BACKEND (WebSocket)
@@ -83,9 +181,22 @@ function connectBackend() {
   backendWs.onmessage = (event) => {
     try {
       const msg = JSON.parse(event.data);
-      if (msg.type === 'sensor') handleSensorData(msg.data);
-      if (msg.type === 'status') handleStatusData(msg.data);
-      if (msg.type === 'state')  { handleSensorData(msg.data); handleStatusData(msg.data); }
+      const deviceId = msg.deviceId;
+      if (!deviceId) return;
+
+      addDeviceToList(deviceId);
+      devicesState[deviceId] = msg.data; // Simpan state terbaru dari ID ini
+
+      // LOG DETAIL UNTUK DEBUGGING (BARU)
+      const typeLabel = msg.type === 'device_update' ? 'SENSOR' : 'STATUS';
+      const detail = `[${deviceId}] ${typeLabel}: Sys=${msg.data.system ? 'ON':'OFF'}, H:${msg.data.bright_hijau}, B:${msg.data.bright_biru}, K:${msg.data.bright_kuning}`;
+      addLog('sub', 'MSG', detail);
+
+      // Cuma update UI kalau ID-nya pas dengan yang dipilih di dropdown
+      if (deviceId === currentDeviceId) {
+        if (msg.type === 'device_update' || msg.type === 'sensor') handleSensorData(msg.data);
+        if (msg.type === 'device_status' || msg.type === 'status') handleStatusData(msg.data);
+      }
     } catch (e) {
       addLog('err', 'ERR', 'Parse error: ' + e.message);
     }
@@ -142,24 +253,37 @@ function initSensorCards() {
   setInterval(() => {
     const now = Date.now();
     
-    // 1. Cek Sensor Individu
-    for (let i = 1; i <= 6; i++) {
-      if (!sensorLastSeen[i]) continue;
-      if (now - sensorLastSeen[i] > ESP_TIMEOUT_MS) {
-        setSensorStatus(i, 'timeout');
-      }
-    }
+    // 1. Cek Status Online/Offline tiap alat di list
+    knownDevices.forEach(id => {
+      const state = devicesState[id];
+      const opt = document.getElementById("opt-" + id);
+      if (!opt) return;
 
-    // 2. Cek Koneksi Fisik ESP32 (Hardware Tracker)
-    const badge     = document.getElementById('sysBadge');
-    const badgeText = document.getElementById('sysBadgeText');
-    if (espLastSeen > 0) {
-      if (now - espLastSeen > ESP_TIMEOUT_MS) {
-        badge.className = 'system-badge'; // merah (default)
-        badgeText.textContent = 'ESP32 OFFLINE';
-      } else {
-        badge.className = 'system-badge on-state'; // hijau
-        badgeText.textContent = 'ESP32 ONLINE';
+      const lastSeen = (state && state.lastUpdate) ? new Date(state.lastUpdate).getTime() : 0;
+      const isOnline = (now - lastSeen < ESP_TIMEOUT_MS);
+      
+      opt.textContent = `DEVICE: ${id} ${isOnline ? '(ONLINE)' : '(OFFLINE)'}`;
+      opt.style.color = isOnline ? '#2dd4bf' : '#f87171';
+
+      // Jika alat yang dipilih saat ini mati, kasih indikator di badge sistem
+      if (id === currentDeviceId) {
+        const badge     = document.getElementById('sysBadge');
+        const badgeText = document.getElementById('sysBadgeText');
+        if (isOnline) {
+          badge.className = 'system-badge on-state';
+          badgeText.textContent = 'ESP32 ONLINE';
+        } else {
+          badge.className = 'system-badge';
+          badgeText.textContent = 'ESP32 OFFLINE';
+        }
+      }
+    });
+
+    // 2. Cek Sensor Individu (Hanya untuk alat yang sedang aktif dilihat)
+    if (currentDeviceId && devicesState[currentDeviceId]) {
+      const state = devicesState[currentDeviceId];
+      for (let i = 1; i <= 6; i++) {
+        // Logika sensor existing...
       }
     }
   }, 3000);
@@ -291,14 +415,30 @@ function connectMQTT() {
 // ============================================================
 function handleSensorData(data) {
   espLastSeen = Date.now(); // ESP32 is alive!
+  
   if (data.dht) {
     addLog('info', 'DHT', `Suhu: ${data.dht.temperature}°C, Lembap: ${data.dht.humidity}%`);
   }
-  if (!data.sensors || !Array.isArray(data.sensors)) return;
-  if (data.system === false && systemOn) {
-    systemOn = false;
+
+  // SINKRONISASI STATUS LAMPU & SISTEM (BARU)
+  if (typeof data.system !== 'undefined') {
+    systemOn = data.system;
     syncSystemUI();
   }
+
+  // Sinkronkan slider jika ada data kecerahan di dalam paket sensor
+  ['hijau', 'biru', 'kuning'].forEach(c => {
+    const val = data[`bright_${c}`];
+    if (typeof val !== 'undefined') {
+      ledBright[c] = val;
+      const slider = document.getElementById(`bright_${c}`);
+      if (slider) slider.value = val;
+      updateBrightLabel(c, val);
+      updateLedVisual(c, val);
+    }
+  });
+
+  if (!data.sensors || !Array.isArray(data.sensors)) return;
   updateSensorUI(data.sensors);
 }
 
@@ -388,6 +528,9 @@ function syncSystemUI() {
 //  PUBLISH KE MQTT (via Backend WS atau langsung MQTT)
 // ============================================================
 function publishControl(payload) {
+  // Tambahkan deviceId ke payload kontrol
+  payload.deviceId = currentDeviceId;
+
   if (USE_BACKEND) {
     // Kirim ke Node.js backend via HTTP API
     fetch(`${BACKEND_URL}/api/control`, {

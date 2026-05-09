@@ -25,18 +25,24 @@ app.use(express.json());
 // ============================================================
 let SERVER_PASSWORD = "admin"; // Default password
 
-const state = {
-  system:        false,
-  bright_hijau:  0,
-  bright_biru:   0,
-  bright_kuning: 0,
-  sensors:       [],
-  dht: {
-    temperature: 0,
-    humidity: 0
-  },
-  lastUpdate:    null,
-};
+const devices = {}; // Kamar penyimpanan kolektif untuk semua ESP32
+
+// Helper buat dapetin atau inisialisasi state per alat
+function getDeviceState(id) {
+  if (!devices[id]) {
+    devices[id] = {
+      id: id,
+      system: false,
+      bright_hijau: 0,
+      bright_biru: 0,
+      bright_kuning: 0,
+      sensors: [],
+      dht: { temperature: 0, humidity: 0 },
+      lastUpdate: null
+    };
+  }
+  return devices[id];
+}
 
 // ============================================================
 //  WEBSOCKET SERVER (untuk kirim data real-time ke Frontend)
@@ -46,16 +52,18 @@ const wss = new WebSocketServer({ server });
 wss.on('connection', (ws) => {
   console.log('[WS] Client terhubung');
 
-  // Kirim state terkini saat client baru connect
-  ws.send(JSON.stringify({ type: 'state', data: state }));
+  // Kirim daftar semua alat saat client baru connect
+  Object.keys(devices).forEach(id => {
+    ws.send(JSON.stringify({ type: 'device_update', deviceId: id, data: devices[id] }));
+  });
 
   ws.on('close', () => console.log('[WS] Client terputus'));
   ws.on('error', (err) => console.error('[WS] Error:', err.message));
 });
 
 // Broadcast ke SEMUA client WebSocket yang terhubung
-function broadcast(type, data) {
-  const msg = JSON.stringify({ type, data });
+function broadcast(type, deviceId, data) {
+  const msg = JSON.stringify({ type, deviceId, data });
   wss.clients.forEach(client => {
     if (client.readyState === 1) client.send(msg);
   });
@@ -64,50 +72,71 @@ function broadcast(type, data) {
 // ============================================================
 //  MQTT BRIDGE — Terima data dari ESP32, teruskan ke Web
 // ============================================================
-mqttBridge.onSensorData((data) => {
-  if (data.sensors) state.sensors = data.sensors;
-  if (data.dht) state.dht = data.dht;
-  if (typeof data.system !== 'undefined') state.system = data.system;
-  state.lastUpdate = new Date().toISOString();
-  broadcast('sensor', data); // Push real-time ke semua frontend
+// Callback dari MQTT: Sensor
+mqttBridge.onSensorData((deviceId, data) => {
+  const dState = getDeviceState(deviceId);
+  
+  if (data.sensors) dState.sensors = data.sensors;
+  if (data.dht) dState.dht = data.dht;
+  if (typeof data.system !== 'undefined') dState.system = data.system;
+  
+  // Ambil juga data lampu jika disertakan di paket sensor
+  if (typeof data.bright_hijau !== 'undefined')  dState.bright_hijau  = data.bright_hijau;
+  if (typeof data.bright_biru !== 'undefined')   dState.bright_biru   = data.bright_biru;
+  if (typeof data.bright_kuning !== 'undefined') dState.bright_kuning = data.bright_kuning;
+
+  dState.lastUpdate = new Date().toISOString();
+
+  broadcast('device_update', deviceId, dState); 
 });
 
-mqttBridge.onStatusData((data) => {
-  if (typeof data.system       !== 'undefined') state.system        = data.system;
-  if (typeof data.bright_hijau !== 'undefined') state.bright_hijau  = data.bright_hijau;
-  if (typeof data.bright_biru  !== 'undefined') state.bright_biru   = data.bright_biru;
-  if (typeof data.bright_kuning!== 'undefined') state.bright_kuning = data.bright_kuning;
+// Callback dari MQTT: Status (Heartbeat/Feedback)
+mqttBridge.onStatusData((deviceId, data) => {
+  const dState = getDeviceState(deviceId);
+
+  if (typeof data.system       !== 'undefined') dState.system        = data.system;
+  if (typeof data.bright_hijau !== 'undefined') dState.bright_hijau  = data.bright_hijau;
+  if (typeof data.bright_biru  !== 'undefined') dState.bright_biru   = data.bright_biru;
+  if (typeof data.bright_kuning!== 'undefined') dState.bright_kuning = data.bright_kuning;
   
   // Fitur SleepWell
-  if (data.lampColor) state.lampColor = data.lampColor;
-  if (typeof data.lampBrightness !== 'undefined') state.lampBrightness = data.lampBrightness;
+  if (data.lampColor) dState.lampColor = data.lampColor;
+  if (typeof data.lampBrightness !== 'undefined') dState.lampBrightness = data.lampBrightness;
   
-  broadcast('status', data); // Push real-time ke semua frontend
+  broadcast('device_status', deviceId, dState);
 });
 
 // ============================================================
 //  REST API ENDPOINTS (untuk React frontend nantinya)
 // ============================================================
 
-// GET /api/status — Ambil state sistem terkini
+// GET /api/status — Ambil daftar semua alat
 app.get('/api/status', (req, res) => {
-  res.json({ ok: true, data: state });
+  res.json({ ok: true, devices });
+});
+
+// GET /api/status/:id — Ambil data per alat
+app.get('/api/status/:id', (req, res) => {
+  const dev = devices[req.params.id];
+  if (dev) res.json({ ok: true, data: dev });
+  else res.status(404).json({ ok: false, error: 'Device tidak ditemukan' });
 });
 
 // POST /api/control — Kirim perintah ke ESP32 via MQTT
 // Body: { system: true/false } atau { command: "led_pwm", color: "hijau", brightness: 128 }
 app.post('/api/control', (req, res) => {
-  const payload = req.body;
-  if (!payload || Object.keys(payload).length === 0) {
-    return res.status(400).json({ ok: false, error: 'Body tidak boleh kosong' });
-  }
-  mqttBridge.publishControl(payload);
-  res.json({ ok: true, message: 'Perintah terkirim ke ESP32', payload });
+  const { deviceId, ...payload } = req.body;
+  if (!deviceId) return res.status(400).json({ ok: false, error: 'deviceId wajib diisi' });
+  
+  mqttBridge.publishControl(payload, deviceId);
+  res.json({ ok: true, message: `Perintah terkirim ke ${deviceId}`, payload });
 });
 
-// GET /api/sensors — Data sensor terbaru
-app.get('/api/sensors', (req, res) => {
-  res.json({ ok: true, data: state.sensors, lastUpdate: state.lastUpdate });
+// GET /api/sensors/:id — Data sensor terbaru per alat
+app.get('/api/sensors/:id', (req, res) => {
+  const dev = devices[req.params.id];
+  if (dev) res.json({ ok: true, data: dev.sensors, lastUpdate: dev.lastUpdate });
+  else res.status(404).json({ ok: false, error: 'Device tidak ditemukan' });
 });
 
 // POST /api/system — Nyalain/matiin sistem

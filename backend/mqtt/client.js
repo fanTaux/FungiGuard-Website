@@ -16,9 +16,9 @@ const CLIENT_ID     = 'node_backend_' + Math.random().toString(16).slice(2, 8);
 
 const BASE    = 'doc/data';
 const TOPICS  = {
-  SENSOR:  BASE + '/sensor',
-  STATUS:  BASE + '/status',
-  CONTROL: BASE + '/control',
+  SENSOR:  BASE + '/+/sensor', // + adalah wildcard untuk deviceId
+  STATUS:  BASE + '/+/status',
+  CONTROL: BASE + '/+/control',
 };
 
 // ============================================================
@@ -54,12 +54,14 @@ client.on('connect', () => {
 
 client.on('message', (topic, payloadBuf) => {
   const raw = payloadBuf.toString();
-  console.log(`[MQTT] ← [${topic.split('/').pop()}] ${raw.slice(0, 100)}`);
+  const parts = topic.split('/'); // doc, data, ID, type
+  const deviceId = parts[2];
+  const type = parts[3];
 
   try {
     const data = JSON.parse(raw);
-    if (topic === TOPICS.SENSOR) _onSensorData(data);
-    if (topic === TOPICS.STATUS) _onStatusData(data);
+    if (type === 'sensor') _onSensorData(deviceId, data);
+    if (type === 'status') _onStatusData(deviceId, data);
   } catch (e) {
     console.error('[MQTT] JSON parse error:', e.message);
   }
@@ -82,14 +84,15 @@ client.on('reconnect', () => {
 // ============================================================
 
 // Publish perintah ke ESP32
-function publishControl(payload) {
+function publishControl(payload, deviceId = "default") {
   if (!client.connected) {
     console.error('[MQTT] Tidak bisa publish: belum terhubung');
     return false;
   }
   const msg = JSON.stringify(payload);
-  client.publish(TOPICS.CONTROL, msg, { qos: 0 });
-  console.log(`[MQTT] → [ctrl] ${msg}`);
+  const topic = `${BASE}/${deviceId}/control`;
+  client.publish(topic, msg, { qos: 0 });
+  console.log(`[MQTT] → [${deviceId}] ${msg}`);
   return true;
 }
 
