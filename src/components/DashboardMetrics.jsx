@@ -9,7 +9,7 @@ export default function DashboardMetrics() {
 
     const temp = espIsAliveState ? (state.dht?.temperature || 0) : '--';
     const hum = espIsAliveState ? (state.dht?.humidity || 0) : '--';
-    
+
     let activeSensors = 0;
     if (espIsAliveState && state.sensors) {
         state.sensors.forEach(s => {
@@ -18,9 +18,6 @@ export default function DashboardMetrics() {
     }
     const displaySensors = espIsAliveState ? activeSensors : '-';
 
-    const sysLabel = state.system ? 'ON' : 'OFF';
-    const sysColor = state.system ? 'text-[#4ade80]' : 'text-on-surface-variant';
-    const sysBg = state.system ? 'bg-[#4ade80]' : 'bg-surface-variant';
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
             {/* Suhu Kamar */}
@@ -52,7 +49,7 @@ export default function DashboardMetrics() {
                     <div className="flex items-center gap-xs">
                         <span className={`w-2 h-2 rounded-full ${espIsAliveState ? 'bg-secondary' : 'bg-red-500'}`}></span>
                         <h3 className={`font-label-lg text-label-lg ${espIsAliveState ? 'text-secondary' : 'text-red-500'}`}>
-                            {espIsAliveState ? 'ONLINE' : 'TERPUTUS'}
+                            {espIsAliveState ? 'Online' : 'Offline'}
                         </h3>
                     </div>
                 </div>
@@ -63,17 +60,19 @@ export default function DashboardMetrics() {
                 </div>
             </div>
 
-            {/* Estimasi Biaya (Energi) */}
-            <div className="glass-card rounded-xl p-md flex items-center justify-between border-l-4 border-[#4ade80]">
+            {/* Kondisi Sensor */}
+            <div className="glass-card rounded-xl p-md flex items-center justify-between border-l-4 border-tertiary">
                 <div>
-                    <p className="text-on-surface-variant font-label-lg text-label-lg mb-1">Biaya Hari Ini</p>
-                    <div className="flex items-baseline gap-1">
-                        <h3 className="font-headline-lg text-headline-lg text-[#4ade80]">Rp 60</h3>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase">Estimated</span>
+                    <p className="text-on-surface-variant font-label-lg text-label-lg mb-1">Kondisi Sensor</p>
+                    <div className="flex items-center gap-xs">
+                        <h3 className={`font-headline-lg text-headline-lg ${espIsAliveState && activeSensors < 6 ? 'text-red-400' : 'text-on-surface'}`}>{displaySensors}/6</h3>
+                        <span className={`font-label-lg text-label-lg px-2 py-0.5 rounded-md ${!espIsAliveState || activeSensors < 6 ? 'text-red-400 bg-red-400/10' : 'text-[#4ade80] bg-[#4ade80]/10'}`}>
+                            {!espIsAliveState ? 'Offline' : (activeSensors < 6 ? 'Warning' : 'Secured')}
+                        </span>
                     </div>
                 </div>
-                <div className="w-12 h-12 rounded-full bg-[#4ade80]/20 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[#4ade80] text-3xl">payments</span>
+                <div className={`w-12 h-12 rounded-full ${!espIsAliveState || activeSensors < 6 ? 'bg-red-400/20' : 'bg-[#4ade80]/20'} flex items-center justify-center`}>
+                    <span className={`material-symbols-outlined ${!espIsAliveState || activeSensors < 6 ? 'text-red-400' : 'text-[#4ade80]'} text-3xl`}>sensors</span>
                 </div>
             </div>
 
@@ -93,51 +92,10 @@ export default function DashboardMetrics() {
                 </div>
             </div>
 
-            {/* Waktu Aktif */}
-            <div className="glass-card rounded-xl p-md flex items-center justify-between border-l-4 border-blue-400">
-                <div>
-                    <p className="text-on-surface-variant font-label-lg text-label-lg mb-1">Waktu Aktif</p>
-                    <h3 className="font-headline-lg text-headline-lg text-on-surface">8.5 Jam</h3>
-                </div>
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-blue-400 text-3xl">avg_time</span>
-                </div>
-            </div>
-
-        {/* Kondisi Sensor */}
-            <div className="glass-card rounded-xl p-md flex items-center justify-between border-l-4 border-tertiary">
-                <div>
-                    <p className="text-on-surface-variant font-label-lg text-label-lg mb-1">Kondisi Sensor</p>
-                    <div className="flex items-center gap-xs">
-                        <h3 className={`font-headline-lg text-headline-lg ${espIsAliveState && activeSensors < 6 ? 'text-red-400' : 'text-on-surface'}`}>{displaySensors}/6</h3>
-                        <span className={`font-label-lg text-label-lg px-2 py-0.5 rounded-md ${!espIsAliveState || activeSensors < 6 ? 'text-red-400 bg-red-400/10' : 'text-[#4ade80] bg-[#4ade80]/10'}`}>
-                            {!espIsAliveState ? 'Offline' : (activeSensors < 6 ? 'Warning' : 'Secured')}
-                        </span>
-                    </div>
-                </div>
-                <div className={`w-12 h-12 rounded-full ${!espIsAliveState || activeSensors < 6 ? 'bg-red-400/20' : 'bg-[#4ade80]/20'} flex items-center justify-center`}>
-                    <span className={`material-symbols-outlined ${!espIsAliveState || activeSensors < 6 ? 'text-red-400' : 'text-[#4ade80]'} text-3xl`}>sensors</span>
-                </div>
-            </div>
-
-            {/* SleepWell Status */}
-            <div className="glass-card rounded-xl p-md flex items-center justify-between border-l-4 border-primary-container">
-                <div>
-                    <p className="text-on-surface-variant font-label-lg text-label-lg mb-1">SleepWell Power</p>
-                    <div className="flex items-center gap-xs mt-1">
-                        <span className={`w-3 h-3 rounded-full ${sysBg} ${state.system ? 'shadow-[0_0_8px_#4ade80]' : ''}`}></span>
-                        <h3 className={`font-headline-lg text-headline-lg ${sysColor} leading-none`}>{sysLabel}</h3>
-                    </div>
-                </div>
-                <div className="w-12 h-12 rounded-full bg-primary-container/50 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-primary text-3xl">power_settings_new</span>
-                </div>
-            </div>
-
-            {/* Koneksi Server */}
+            {/* Koneksi Wi-Fi */}
             <div className="glass-card rounded-xl p-md flex items-center justify-between border-l-4 border-secondary-container">
                 <div>
-                    <p className="text-on-surface-variant font-label-lg text-label-lg mb-1">Koneksi Server</p>
+                    <p className="text-on-surface-variant font-label-lg text-label-lg mb-1">Koneksi Wi-Fi</p>
                     <div className="flex items-center gap-xs mt-1">
                         <span className={`material-symbols-outlined text-xl ${isConnected ? 'text-secondary' : 'text-red-500'}`}>{isConnected ? 'wifi' : 'wifi_off'}</span>
                         <h3 className={`font-label-lg text-label-lg ${isConnected ? 'text-secondary' : 'text-red-500'}`}>{isConnected ? 'Terhubung' : 'Terputus'}</h3>

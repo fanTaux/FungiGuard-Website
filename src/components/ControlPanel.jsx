@@ -29,13 +29,13 @@ export default function ControlPanel() {
             <div className="flex items-center justify-between mb-lg">
                 <h2 className="font-headline-md text-headline-md text-on-surface">Control Panel</h2>
             </div>
-            <div className="space-y-xl">
+            <div className="space-y-6">
                 {/* Lighting Slider */}
                 <div className="space-y-sm">
                     <div className="flex justify-between items-center">
                         <span className="font-label-lg text-label-lg text-on-surface-variant flex items-center gap-xs">
                             <span className="material-symbols-outlined text-sm">light_mode</span>
-                            Lamp Brightness
+                            Kecerahan Lampu
                         </span>
                         <span className="font-label-lg text-label-lg text-on-surface">{Math.round((localBrightness/255)*100)}%</span>
                     </div>
@@ -49,17 +49,17 @@ export default function ControlPanel() {
                         onTouchEnd={handleBrightnessEnd}
                     />
                 </div>
-                {/* Lamp Color (PWM) */}
+                {/* Lamp Color */}
                 <div className="space-y-sm">
                     <div className="flex justify-between items-center">
                         <span className="font-label-lg text-label-lg text-on-surface-variant flex items-center gap-xs">
                             <span className="material-symbols-outlined text-sm">palette</span>
-                            Lamp Color (PWM)
+                            Warna Lampu
                         </span>
                     </div>
                     <p className="text-xs text-on-surface-variant bg-surface-container-low p-2 rounded-lg italic">
                         <span className="material-symbols-outlined text-[14px] inline-block align-middle mr-1 text-primary">info</span>
-                        Colors are specifically calibrated to emit wavelengths that mosquitoes naturally avoid, keeping your room aesthetic and bite-free.
+                        Warna-warna ini dikalibrasi secara khusus untuk memancarkan panjang gelombang yang secara alami dihindari nyamuk, menjaga estetika ruangan Anda dan bebas dari gigitan.
                     </p>
                     <div className="grid grid-cols-5 gap-base pt-1">
                         <button onClick={() => handleColorChange('putih')} className={`h-10 rounded-lg bg-white border-2 shadow-sm transition-all ${state.lampColor === 'putih' ? 'border-primary ring-2 ring-primary/20' : 'border-transparent hover:border-primary/50'}`} title="Putih"></button>
