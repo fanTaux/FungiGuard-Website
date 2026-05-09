@@ -1,8 +1,24 @@
+import { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
+import AlertHistory from './AlertHistory';
 
 export default function TopNavBar() {
     const { devices, activeDeviceId, setActiveDeviceId } = useAppContext();
+    const [showNotifications, setShowNotifications] = useState(false);
+    const notifRef = useRef(null);
     const deviceIds = Object.keys(devices);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (notifRef.current && !notifRef.current.contains(event.target)) {
+                setShowNotifications(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     return (
         <header className="fixed top-0 w-full z-50 flex justify-between items-center px-margin h-16 bg-surface/60 backdrop-blur-md shadow-sm">
@@ -34,10 +50,23 @@ export default function TopNavBar() {
                 </div>
 
                 <div className="flex items-center gap-sm">
-                    <button className="p-2 rounded-full hover:bg-surface-container-low transition-colors relative">
-                        <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-tertiary rounded-full"></span>
-                    </button>
+                    <div className="relative" ref={notifRef}>
+                        <button 
+                            onClick={() => setShowNotifications(!showNotifications)}
+                            className={`p-2 rounded-full transition-colors relative ${showNotifications ? 'bg-surface-container-high' : 'hover:bg-surface-container-low'}`}
+                        >
+                            <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-tertiary rounded-full"></span>
+                        </button>
+
+                        {showNotifications && (
+                            <div className="absolute right-0 mt-3 w-[400px] max-h-[80vh] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 animate-fade-in origin-top-right">
+                                <div className="p-1">
+                                    <AlertHistory isDropdown={true} />
+                                </div>
+                            </div>
+                        )}
+                    </div>
                     <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed shadow-sm">
                         <img alt="User Profile Avatar" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDu1VX7-YQC8e-JmHClPrC0FHyGKrm1Iz3fuyyaXcSWp5x-pPsrTrauHZodbb5B-0fH2v5HSBWjvDnq4oo46I9Wg7NRqX7BQzHq9jw1Ee8sb8zNAkhteFoP6sfYnX9KGpRZdF7VHtWttpcFlX8gW4Zxn5pEPpIhC0Pxnhp35teXMpW7LybzJJQxv9WceWVtpizTHgy7FUOs5YTY6EolIxyiLwMulhzJz_HUr7-qxKElOI0uhlhe069kwNHOc9OYN6Z9pi5An4I1jQ" />
                     </div>

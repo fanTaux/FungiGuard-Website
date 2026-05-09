@@ -1,8 +1,8 @@
-export default function AlertHistory() {
+export default function AlertHistory({ isDropdown = false }) {
     return (
-        <section className="glass-card rounded-xl p-md overflow-hidden">
-            <div className="flex items-center justify-between mb-md">
-                <h2 className="font-headline-md text-headline-md text-on-surface">Alert History</h2>
+        <section className={isDropdown ? "p-4" : "glass-card rounded-xl p-md overflow-hidden"}>
+            <div className={`flex items-center justify-between ${isDropdown ? 'mb-4' : 'mb-md'}`}>
+                <h2 className={isDropdown ? "font-bold text-[#624633] text-lg" : "font-headline-md text-headline-md text-on-surface"}>Alert History</h2>
                 <button className="text-primary font-label-lg text-label-lg hover:underline transition-all">Lihat Semua</button>
             </div>
             <div className="divide-y divide-outline-variant">
