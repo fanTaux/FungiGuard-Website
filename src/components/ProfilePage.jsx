@@ -1,4 +1,8 @@
+import { useAppContext } from '../context/AppContext';
+
 export default function ProfilePage() {
+  const { user } = useAppContext();
+
   return (
     <div className="max-w-3xl mx-auto pb-12 space-y-6 animate-fade-in">
       {/* Header */}
@@ -13,12 +17,16 @@ export default function ProfilePage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#f8f5f1] to-transparent rounded-bl-full pointer-events-none opacity-50"></div>
 
         <div className="relative z-10">
-          <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[#f8f5f1] shadow-lg relative">
-            <img
-              alt="Profile"
-              className="w-full h-full object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDu1VX7-YQC8e-JmHClPrC0FHyGKrm1Iz3fuyyaXcSWp5x-pPsrTrauHZodbb5B-0fH2v5HSBWjvDnq4oo46I9Wg7NRqX7BQzHq9jw1Ee8sb8zNAkhteFoP6sfYnX9KGpRZdF7VHtWttpcFlX8gW4Zxn5pEPpIhC0Pxnhp35teXMpW7LybzJJQxv9WceWVtpizTHgy7FUOs5YTY6EolIxyiLwMulhzJz_HUr7-qxKElOI0uhlhe069kwNHOc9OYN6Z9pi5An4I1jQ"
-            />
+          <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[#f8f5f1] shadow-lg relative bg-[#8c7462] flex items-center justify-center">
+            {user?.avatar ? (
+              <img
+                alt="Profile"
+                className="w-full h-full object-cover"
+                src={user.avatar}
+              />
+            ) : (
+              <span className="text-4xl font-black text-white">{user?.name?.substring(0,2).toUpperCase()}</span>
+            )}
             <button className="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-[10px] font-bold py-1 backdrop-blur-sm hover:bg-black/60 transition-colors">
               Ubah Foto
             </button>
@@ -27,19 +35,21 @@ export default function ProfilePage() {
 
         <div className="relative z-10 flex-1 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-            <h3 className="text-3xl font-black text-[#624633]">Budi Darmawan</h3>
+            <h3 className="text-3xl font-black text-[#624633]">{user?.name || 'User SleepWell'}</h3>
             <span className="material-symbols-outlined text-[#4ade80] text-xl" title="Akun Terverifikasi">verified</span>
           </div>
-          <p className="text-sm font-semibold text-[#8c7462] mb-4">budi.darmawan@email.com</p>
+          <p className="text-sm font-semibold text-[#8c7462] mb-4">@{user?.username || 'username'}</p>
 
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-4">
             <div className="inline-flex items-center gap-1.5 bg-[#f8f5f1] text-[#624633] px-3 py-1.5 rounded-full text-xs font-bold border border-[#e6ceb3]/50">
-              <span className="material-symbols-outlined text-sm">admin_panel_settings</span>
-              Administrator
+              <span className="material-symbols-outlined text-sm">
+                {user?.role === 'ADMIN' ? 'admin_panel_settings' : 'person'}
+              </span>
+              {user?.role === 'ADMIN' ? 'Administrator' : 'Anggota Keluarga'}
             </div>
             <div className="inline-flex items-center gap-1.5 bg-gray-50 text-gray-600 px-3 py-1.5 rounded-full text-xs font-bold border border-gray-200">
               <span className="material-symbols-outlined text-sm">calendar_today</span>
-              Bergabung sejak 2024
+              Bergabung sejak 2026
             </div>
           </div>
         </div>
