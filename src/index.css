@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+    body {
+        @apply bg-[#fcfaf7] text-gray-900;
+    }
+}
+
 @layer utilities {
     .glass-card {
         background: rgba(255, 255, 255, 0.6);

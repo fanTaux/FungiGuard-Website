@@ -10,7 +10,39 @@ const cors       = require('cors');
 const jwt        = require('jsonwebtoken');
 const bcrypt     = require('bcryptjs');
 const mqttBridge = require('./mqtt/client');
-const { User, Device, SensorLog, Scan, Alert } = require('./db');
+const { db, User, Device, SensorLog, Scan, Alert } = require('./db');
+const { spawn } = require('child_process');
+const path = require('path');
+
+// Fungsi untuk menjalankan Prediksi AI menggunakan script Python
+async function runAIPrediction(deviceId, temp, hum, ldr) {
+    return new Promise((resolve) => {
+        const pythonProcess = spawn('python', [path.join(__dirname, 'ai', 'predict.py')]);
+        let result = '';
+// ... (rest of function unchanged, just fixing the variable)
+
+        pythonProcess.stdin.write(JSON.stringify({ temp, hum, ldr }));
+        pythonProcess.stdin.end();
+
+        pythonProcess.stdout.on('data', (data) => {
+            result += data.toString();
+        });
+
+        pythonProcess.on('close', () => {
+            try {
+                const prediction = JSON.parse(result);
+                if (prediction.error) {
+                    console.error('[AI] Error:', prediction.error);
+                    resolve(null);
+                } else {
+                    resolve(prediction);
+                }
+            } catch (e) {
+                resolve(null);
+            }
+        });
+    });
+}
 
 const app    = express();
 const server = http.createServer(app);
@@ -104,6 +136,22 @@ function broadcast(type, deviceId, data) {
 // ============================================================
 mqttBridge.onSensorData((deviceId, data) => {
   const dState = getDeviceState(deviceId);
+
+  // AUTO-REGISTER DEVICE IF NOT EXISTS
+  if (!dState.isRegisteredChecked) {
+      try {
+          const allDevices = Device.findAll();
+          const exists = allDevices.some(d => d.deviceId === deviceId);
+          if (!exists) {
+              console.log(`[DB] Mendaftarkan perangkat baru otomatis: ${deviceId}`);
+              Device.create({ deviceId, name: `Scanner ${deviceId.slice(-4)}` });
+          }
+          dState.isRegisteredChecked = true;
+      } catch (e) {
+          console.error('[DB] Gagal auto-register device:', e.message);
+      }
+  }
+
   if (data.sensors) {
       dState.sensors = data.sensors;
       // Deteksi Sensor Mati (Misal kalau ada yang 0)
@@ -122,17 +170,28 @@ mqttBridge.onSensorData((deviceId, data) => {
               humidity: data.dht.humidity,
               timestamp: new Date().toISOString()
           });
+
+          // JALANKAN PREDIKSI AI JIKA ADA DATA LDR
+          if (typeof data.ldr !== 'undefined') {
+              dState.ldr = data.ldr;
+              console.log(`[MQTT] 🔦 LDR Update: ${data.ldr}`);
+              
+              runAIPrediction(deviceId, data.dht.temperature, data.dht.humidity, data.ldr)
+                  .then(prediction => {
+                      if (prediction) {
+                          dState.aiRisk = prediction.riskLevel;
+                          dState.aiLabel = prediction.label;
+                          broadcast('device_update', deviceId, dState);
+                      }
+                  });
+          }
       } catch (e) {
           console.error('[DB] Gagal simpan log:', e.message);
       }
   }
   if (typeof data.system !== 'undefined') dState.system = data.system;
   
-  // Deteksi WiFi Putus
-  if (data.wifi_ssid === 'Disconnected' || data.rssi === 0) {
-      Alert.create({ deviceId, type: 'danger', message: 'Koneksi WiFi Perangkat Terputus!' });
-  }
-  
+  // Update WiFi info dari sensor payload juga
   if (data.wifi_ssid) dState.wifi_ssid = data.wifi_ssid;
   if (typeof data.rssi !== 'undefined') dState.rssi = data.rssi;
   
@@ -146,10 +205,18 @@ mqttBridge.onStatusData((deviceId, data) => {
   if (data.lampColor) dState.lampColor = data.lampColor;
   if (typeof data.lampBrightness !== 'undefined') dState.lampBrightness = data.lampBrightness;
   
-  // Tambahkan dukungan WiFi info dan List WiFi
+  // FIX: Terima wifi_list dengan format fleksibel dari ESP32
   if (data.wifi_ssid) dState.wifi_ssid = data.wifi_ssid;
   if (typeof data.rssi !== 'undefined') dState.rssi = data.rssi;
-  if (data.type === 'wifi_list') dState.wifi_list = data.networks;
+  
+  // Terima wifi_list dari kedua format: { type:'wifi_list', networks:[...] } ATAU { wifi_list:[...] }
+  if (data.type === 'wifi_list' && data.networks) {
+      dState.wifi_list = data.networks;
+      console.log(`[MQTT] 📶 WiFi list diterima: ${data.networks.length} jaringan`);
+  } else if (data.wifi_list && Array.isArray(data.wifi_list)) {
+      dState.wifi_list = data.wifi_list;
+      console.log(`[MQTT] 📶 WiFi list diterima: ${data.wifi_list.length} jaringan`);
+  }
 
   broadcast('device_status', deviceId, dState);
 });
@@ -192,11 +259,27 @@ app.get('/api/alerts/:deviceId', authenticate, (req, res) => {
 });
 
 app.post('/api/scans', authenticate, (req, res) => {
+    console.log('[API] Menerima Hasil Scan:', req.body);
     try {
+        if (!req.body.deviceId || !req.body.location) {
+            return res.status(400).json({ ok: false, error: 'Data tidak lengkap' });
+        }
         Scan.create(req.body);
+        console.log('[API] ✅ Berhasil simpan ke DB');
         res.json({ ok: true });
     } catch (err) {
-        res.status(400).json({ ok: false, error: 'Gagal menyimpan hasil pemindaian' });
+        console.error('[API] ❌ Gagal simpan scan:', err.message);
+        res.status(400).json({ ok: false, error: 'Gagal menyimpan hasil pemindaian: ' + err.message });
+    }
+});
+
+app.delete('/api/scans/:id', authenticate, (req, res) => {
+    try {
+        const { id } = req.params;
+        db.prepare('DELETE FROM scan_history WHERE id = ?').run(id);
+        res.json({ ok: true, message: 'Riwayat berhasil dihapus' });
+    } catch (e) {
+        res.status(500).json({ ok: false, error: e.message });
     }
 });
 

@@ -42,11 +42,11 @@ export default function TopNavBar({ onProfileClick }) {
                     <span className="text-primary font-bold border-b-2 border-primary font-label-lg text-label-lg py-1">Room Selector</span>
                 </div>
                 
-                <div className="relative">
+                <div className="relative group">
                     <select 
                         value={activeDeviceId || ''}
                         onChange={(e) => setActiveDeviceId(e.target.value)}
-                        className="appearance-none bg-surface-container-low pl-4 pr-10 py-1.5 rounded-full cursor-pointer hover:bg-surface-container-high transition-colors font-label-lg text-label-lg text-[#624633] font-bold focus:outline-none focus:ring-2 focus:ring-[#d8a878]"
+                        className="appearance-none bg-white border-2 border-green-100 pl-5 pr-12 py-2 rounded-2xl cursor-pointer hover:border-[#52b788] hover:shadow-md transition-all font-black text-[11px] uppercase tracking-wider text-[#1b4332] focus:outline-none focus:ring-4 focus:ring-[#52b788]/10"
                     >
                         {deviceIds.length === 0 && <option value="">Tidak ada alat</option>}
                         {deviceIds.map(id => (
@@ -55,8 +55,8 @@ export default function TopNavBar({ onProfileClick }) {
                             </option>
                         ))}
                     </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <span className="material-symbols-outlined text-outline text-sm">expand_more</span>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-[#52b788]">
+                        <span className="material-symbols-outlined text-xl">unfold_more</span>
                     </div>
                 </div>
 
