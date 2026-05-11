@@ -116,6 +116,9 @@ void publishStatus() {
     doc["bright_hijau"] = brightHijau;
     doc["bright_biru"] = brightBiru;
     doc["bright_kuning"] = brightKuning;
+    doc["wifi_ssid"] = (WiFi.status() == WL_CONNECTED) ? WiFi.SSID() : "Disconnected";
+    doc["rssi"] = (WiFi.status() == WL_CONNECTED) ? WiFi.RSSI() : 0;
+    
     char buf[256]; serializeJson(doc, buf);
     mqttClient.publish(TOPIC_STATUS.c_str(), buf, true);
     xSemaphoreGive(mqttMutex);
@@ -146,6 +149,8 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
         int brightness = doc["brightness"].as<int>();
         if (color == "putih") { brightHijau = brightness; brightBiru = brightness; brightKuning = brightness; }
         else if (color == "hijau") { brightHijau = brightness; brightBiru = 0; brightKuning = 0; }
+        else if (color == "biru") { brightHijau = 0; brightBiru = brightness; brightKuning = 0; }
+        else if (color == "kuning") { brightHijau = 0; brightBiru = 0; brightKuning = brightness; }
         else if (color == "ungu") { brightHijau = 0; brightBiru = brightness; brightKuning = brightness; }
         else if (color == "earth_tone") { brightHijau = brightness / 2; brightBiru = 0; brightKuning = brightness; }
         updateLED();
@@ -153,6 +158,22 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
       else if (cmd == "update_wifi") {
         WiFi.begin(doc["wifi_ssid"].as<const char*>(), doc["wifi_pass"].as<const char*>());
         vTaskDelay(2000 / portTICK_PERIOD_MS); ESP.restart();
+      } else if (cmd == "scan_wifi") {
+        int n = WiFi.scanNetworks();
+        if (xSemaphoreTake(mqttMutex, (TickType_t)1000) == pdTRUE) {
+          StaticJsonDocument<1024> res;
+          res["type"] = "wifi_list";
+          JsonArray list = res.createNestedArray("networks");
+          for (int i = 0; i < n; ++i) {
+            JsonObject item = list.createNestedObject();
+            item["ssid"] = WiFi.SSID(i);
+            item["rssi"] = WiFi.RSSI(i);
+            item["secure"] = (WiFi.encryptionType(i) != WIFI_AUTH_OPEN);
+          }
+          char buf[1024]; serializeJson(res, buf);
+          mqttClient.publish(TOPIC_STATUS.c_str(), buf);
+          xSemaphoreGive(mqttMutex);
+        }
       }
     }
     publishStatus();
@@ -192,6 +213,8 @@ void TaskSensorCode(void * pvParameters) {
       doc["bright_hijau"] = brightHijau;
       doc["bright_biru"] = brightBiru;
       doc["bright_kuning"] = brightKuning;
+      doc["wifi_ssid"] = (WiFi.status() == WL_CONNECTED) ? WiFi.SSID() : "Disconnected";
+      doc["rssi"] = (WiFi.status() == WL_CONNECTED) ? WiFi.RSSI() : 0;
       
       // Data DHT (Suhu & Kelembapan)
       JsonObject dhtData = doc.createNestedObject("dht");
@@ -272,6 +295,7 @@ void setup() {
   
   Serial.println("[WiFi] ✅ Terhubung ke Internet!");
   secureClient.setInsecure();
+  secureClient.setHandshakeTimeout(30);
   mqttClient.setServer(mqtt_server, mqtt_port);
   mqttClient.setCallback(mqttCallback);
   mqttClient.setBufferSize(512);

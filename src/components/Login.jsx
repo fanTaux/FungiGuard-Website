@@ -3,20 +3,20 @@ import { useAppContext } from '../context/AppContext';
 
 export default function Login() {
   const { login } = useAppContext();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('admin');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [resetEmail, setResetEmail] = useState('');
+  const [resetUsername, setResetUsername] = useState('');
   const [resetStatus, setResetStatus] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // API saat ini hanya butuh password, username bisa dilewatkan/diabaikan secara logika
-    const success = await login(password);
-    if (!success) {
-      setError('Password salah atau server mati!');
+    setError(''); // Clear previous error
+    const result = await login(username, password);
+    if (!result.ok) {
+      setError(result.error);
     }
   };
 
@@ -40,20 +40,20 @@ export default function Login() {
           <div className="space-y-4 text-left animate-fade-in">
             <div className="text-center mb-6">
               <h3 className="text-lg font-bold text-[#624633] mb-2">Lupa Password?</h3>
-              <p className="text-xs text-gray-500">Masukkan email atau username Anda untuk mereset password.</p>
+              <p className="text-xs text-gray-500">Masukkan username Anda untuk mereset password.</p>
             </div>
             
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1 ml-1">Email / Username</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1 ml-1">Username</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-gray-400 text-lg">mail</span>
+                  <span className="material-symbols-outlined text-gray-400 text-lg">person</span>
                 </div>
                 <input 
                   type="text" 
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  placeholder="Masukkan email/username"
+                  value={resetUsername}
+                  onChange={(e) => setResetUsername(e.target.value)}
+                  placeholder="Masukkan username Anda"
                   className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#8c7462] focus:ring-1 focus:ring-[#8c7462] transition-all"
                 />
               </div>
@@ -65,12 +65,12 @@ export default function Login() {
               <button 
                 onClick={(e) => {
                   e.preventDefault();
-                  if(!resetEmail) return;
-                  setResetStatus('Tautan reset password telah dikirim ke perangkat Anda!');
+                  if(!resetUsername) return;
+                  setResetStatus('Permintaan reset password telah dikirim ke Admin!');
                 }}
                 className="w-full bg-[#735d4d] text-white py-3 rounded-xl text-sm font-semibold hover:bg-[#624633] transition-colors flex justify-center items-center gap-2 shadow-md"
               >
-                Kirim Link Reset
+                Kirim Permintaan
                 <span className="material-symbols-outlined text-sm">send</span>
               </button>
               
@@ -78,7 +78,7 @@ export default function Login() {
                 onClick={() => {
                   setIsForgotPassword(false);
                   setResetStatus('');
-                  setResetEmail('');
+                  setResetUsername('');
                 }}
                 className="w-full bg-white border border-gray-200 text-gray-600 py-3 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors flex justify-center items-center gap-2"
               >

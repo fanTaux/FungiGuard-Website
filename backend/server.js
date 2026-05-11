@@ -1,41 +1,76 @@
 // ============================================================
-//  INKUBATOR BACKEND — server.js
-//  Stack: Express (HTTP) + ws (WebSocket) + mqtt (MQTT Bridge)
-//  Role: Jembatan antara ESP32 (MQTT) dan Frontend (React/Web)
+//  INKUBATOR BACKEND — server.js (SQLite Version)
 // ============================================================
 
+require('dotenv').config();
 const express    = require('express');
 const http       = require('http');
 const { WebSocketServer } = require('ws');
 const cors       = require('cors');
+const jwt        = require('jsonwebtoken');
+const bcrypt     = require('bcryptjs');
 const mqttBridge = require('./mqtt/client');
+const { User, Device, SensorLog, Scan, Alert } = require('./db');
 
 const app    = express();
 const server = http.createServer(app);
 const PORT   = process.env.PORT || 3000;
 
 // ============================================================
+//  DATABASE SEEDING
+// ============================================================
+async function seedAdmin() {
+  const adminExists = User.findOne({ username: 'admin' });
+  if (!adminExists) {
+    await User.create({
+      name: 'Admin SleepWell',
+      username: 'admin',
+      password: 'admin',
+      role: 'ADMIN',
+      initials: 'AD'
+    });
+    console.log('👤 Admin default siap: username: admin / password: admin (SQLite)');
+  }
+}
+
+seedAdmin();
+
+// ============================================================
 //  MIDDLEWARE
 // ============================================================
-app.use(cors()); // Izinkan request dari frontend di port berbeda
+app.use(cors()); 
 app.use(express.json());
 
 // ============================================================
-//  STATE SISTEM (Memory)
+//  AUTH MIDDLEWARE
 // ============================================================
-let SERVER_PASSWORD = "admin"; // Default password
+const authenticate = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ ok: false, error: 'Akses ditolak' });
 
-const devices = {}; // Kamar penyimpanan kolektif untuk semua ESP32
+  try {
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = verified;
+    next();
+  } catch (err) {
+    res.status(401).json({ ok: false, error: 'Token tidak valid' });
+  }
+};
 
-// Helper buat dapetin atau inisialisasi state per alat
+const isAdmin = (req, res, next) => {
+  if (req.user.role !== 'ADMIN') {
+    return res.status(403).json({ ok: false, error: 'Hanya Admin yang diizinkan' });
+  }
+  next();
+};
+
+const devices = {}; // Real-time state
+
 function getDeviceState(id) {
   if (!devices[id]) {
     devices[id] = {
       id: id,
       system: false,
-      bright_hijau: 0,
-      bright_biru: 0,
-      bright_kuning: 0,
       sensors: [],
       dht: { temperature: 0, humidity: 0 },
       lastUpdate: null
@@ -45,23 +80,18 @@ function getDeviceState(id) {
 }
 
 // ============================================================
-//  WEBSOCKET SERVER (untuk kirim data real-time ke Frontend)
+//  WEBSOCKET SERVER
 // ============================================================
 const wss = new WebSocketServer({ server });
 
 wss.on('connection', (ws) => {
   console.log('[WS] Client terhubung');
-
-  // Kirim daftar semua alat saat client baru connect
   Object.keys(devices).forEach(id => {
     ws.send(JSON.stringify({ type: 'device_update', deviceId: id, data: devices[id] }));
   });
-
   ws.on('close', () => console.log('[WS] Client terputus'));
-  ws.on('error', (err) => console.error('[WS] Error:', err.message));
 });
 
-// Broadcast ke SEMUA client WebSocket yang terhubung
 function broadcast(type, deviceId, data) {
   const msg = JSON.stringify({ type, deviceId, data });
   wss.clients.forEach(client => {
@@ -70,131 +100,180 @@ function broadcast(type, deviceId, data) {
 }
 
 // ============================================================
-//  MQTT BRIDGE — Terima data dari ESP32, teruskan ke Web
+//  MQTT BRIDGE
 // ============================================================
-// Callback dari MQTT: Sensor
 mqttBridge.onSensorData((deviceId, data) => {
   const dState = getDeviceState(deviceId);
-  
-  if (data.sensors) dState.sensors = data.sensors;
-  if (data.dht) dState.dht = data.dht;
+  if (data.sensors) {
+      dState.sensors = data.sensors;
+      // Deteksi Sensor Mati (Misal kalau ada yang 0)
+      const deadSensors = data.sensors.filter(s => s === 0).length;
+      if (deadSensors > 0) {
+          Alert.create({ deviceId, type: 'danger', message: `Bahaya: ${deadSensors} sensor tidak merespon / mati!` });
+      }
+  }
+  if (data.dht) {
+      dState.dht = data.dht;
+      // SIMPAN KE LOG DATABASE
+      try {
+          SensorLog.create({
+              deviceId,
+              temperature: data.dht.temperature,
+              humidity: data.dht.humidity,
+              timestamp: new Date().toISOString()
+          });
+      } catch (e) {
+          console.error('[DB] Gagal simpan log:', e.message);
+      }
+  }
   if (typeof data.system !== 'undefined') dState.system = data.system;
   
-  // Ambil juga data lampu jika disertakan di paket sensor
-  if (typeof data.bright_hijau !== 'undefined')  dState.bright_hijau  = data.bright_hijau;
-  if (typeof data.bright_biru !== 'undefined')   dState.bright_biru   = data.bright_biru;
-  if (typeof data.bright_kuning !== 'undefined') dState.bright_kuning = data.bright_kuning;
-
+  // Deteksi WiFi Putus
+  if (data.wifi_ssid === 'Disconnected' || data.rssi === 0) {
+      Alert.create({ deviceId, type: 'danger', message: 'Koneksi WiFi Perangkat Terputus!' });
+  }
+  
+  if (data.wifi_ssid) dState.wifi_ssid = data.wifi_ssid;
+  if (typeof data.rssi !== 'undefined') dState.rssi = data.rssi;
+  
   dState.lastUpdate = new Date().toISOString();
-
   broadcast('device_update', deviceId, dState); 
 });
 
-// Callback dari MQTT: Status (Heartbeat/Feedback)
 mqttBridge.onStatusData((deviceId, data) => {
   const dState = getDeviceState(deviceId);
-
   if (typeof data.system       !== 'undefined') dState.system        = data.system;
-  if (typeof data.bright_hijau !== 'undefined') dState.bright_hijau  = data.bright_hijau;
-  if (typeof data.bright_biru  !== 'undefined') dState.bright_biru   = data.bright_biru;
-  if (typeof data.bright_kuning!== 'undefined') dState.bright_kuning = data.bright_kuning;
-  
-  // Fitur SleepWell
   if (data.lampColor) dState.lampColor = data.lampColor;
   if (typeof data.lampBrightness !== 'undefined') dState.lampBrightness = data.lampBrightness;
   
+  // Tambahkan dukungan WiFi info dan List WiFi
+  if (data.wifi_ssid) dState.wifi_ssid = data.wifi_ssid;
+  if (typeof data.rssi !== 'undefined') dState.rssi = data.rssi;
+  if (data.type === 'wifi_list') dState.wifi_list = data.networks;
+
   broadcast('device_status', deviceId, dState);
 });
 
 // ============================================================
-//  REST API ENDPOINTS (untuk React frontend nantinya)
+//  REST API ENDPOINTS
 // ============================================================
 
-// GET /api/status — Ambil daftar semua alat
 app.get('/api/status', (req, res) => {
   res.json({ ok: true, devices });
 });
 
-// GET /api/status/:id — Ambil data per alat
-app.get('/api/status/:id', (req, res) => {
-  const dev = devices[req.params.id];
-  if (dev) res.json({ ok: true, data: dev });
-  else res.status(404).json({ ok: false, error: 'Device tidak ditemukan' });
-});
-
-// POST /api/control — Kirim perintah ke ESP32 via MQTT
-// Body: { system: true/false } atau { command: "led_pwm", color: "hijau", brightness: 128 }
 app.post('/api/control', (req, res) => {
   const { deviceId, ...payload } = req.body;
   if (!deviceId) return res.status(400).json({ ok: false, error: 'deviceId wajib diisi' });
-  
   mqttBridge.publishControl(payload, deviceId);
   res.json({ ok: true, message: `Perintah terkirim ke ${deviceId}`, payload });
 });
 
-// GET /api/sensors/:id — Data sensor terbaru per alat
-app.get('/api/sensors/:id', (req, res) => {
-  const dev = devices[req.params.id];
-  if (dev) res.json({ ok: true, data: dev.sensors, lastUpdate: dev.lastUpdate });
-  else res.status(404).json({ ok: false, error: 'Device tidak ditemukan' });
-});
-
-// POST /api/system — Nyalain/matiin sistem
-app.post('/api/system', (req, res) => {
-  const { on } = req.body;
-  if (typeof on !== 'boolean') return res.status(400).json({ ok: false, error: 'Field "on" harus boolean' });
-  mqttBridge.publishControl({ system: on });
-  res.json({ ok: true, message: `System ${on ? 'ON' : 'OFF'} dikirim ke ESP32` });
-});
-
-// POST /api/led — Atur kecerahan LED
-// Body: { color: "hijau"|"biru"|"kuning", brightness: 0-255 }
-app.post('/api/led', (req, res) => {
-  const { color, brightness } = req.body;
-  const validColors = ['hijau', 'biru', 'kuning'];
-  if (!validColors.includes(color)) return res.status(400).json({ ok: false, error: 'Color tidak valid' });
-  if (brightness < 0 || brightness > 255) return res.status(400).json({ ok: false, error: 'Brightness harus 0-255' });
-  mqttBridge.publishControl({ command: 'led_pwm', color, brightness: parseInt(brightness) });
-  res.json({ ok: true, message: `LED ${color} → ${brightness}` });
-});
-
-// POST /api/wifi — Ganti WiFi ESP32
-app.post('/api/wifi', (req, res) => {
-  const { ssid, password } = req.body;
-  if (!ssid) return res.status(400).json({ ok: false, error: 'SSID wajib diisi' });
-  mqttBridge.publishControl({ command: 'update_wifi', wifi_ssid: ssid, wifi_pass: password || '' });
-  res.json({ ok: true, message: 'Perintah ganti WiFi terkirim' });
-});
-
-// POST /api/wifi/reset — Reset WiFi ESP32
-app.post('/api/wifi/reset', (req, res) => {
-  mqttBridge.publishControl({ command: 'reset_wifi' });
-  res.json({ ok: true, message: 'Perintah reset WiFi terkirim' });
-});
-
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, uptime: process.uptime(), timestamp: new Date().toISOString() });
 });
 
-// POST /api/login — Autentikasi
-app.post('/api/login', (req, res) => {
-  const { password } = req.body;
-  if (password === SERVER_PASSWORD) {
-    res.json({ ok: true, token: "sleepwell-auth-token-123" });
-  } else {
-    res.status(401).json({ ok: false, error: 'Password salah!' });
+app.get('/api/history/:deviceId', authenticate, async (req, res) => {
+  try {
+    const history = SensorLog.getHistory(req.params.deviceId, 24);
+    res.json({ ok: true, history });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'Gagal mengambil riwayat' });
   }
 });
 
-// POST /api/password — Ganti Password
-app.post('/api/password', (req, res) => {
-  const { oldPassword, newPassword } = req.body;
-  if (oldPassword === SERVER_PASSWORD) {
-    SERVER_PASSWORD = newPassword;
-    res.json({ ok: true, message: 'Password berhasil diubah!' });
+app.get('/api/alerts/:deviceId', authenticate, (req, res) => {
+    try {
+        const alerts = Alert.getRecent(req.params.deviceId, 10);
+        res.json({ ok: true, alerts });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: 'Gagal mengambil riwayat peringatan' });
+    }
+});
+
+app.post('/api/scans', authenticate, (req, res) => {
+    try {
+        Scan.create(req.body);
+        res.json({ ok: true });
+    } catch (err) {
+        res.status(400).json({ ok: false, error: 'Gagal menyimpan hasil pemindaian' });
+    }
+});
+
+app.get('/api/scans/:deviceId', authenticate, (req, res) => {
+    try {
+        const scans = Scan.getHistory(req.params.deviceId, 20);
+        res.json({ ok: true, scans });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: 'Gagal mengambil riwayat pemindaian' });
+    }
+});
+
+app.get('/api/alerts/:deviceId', authenticate, (req, res) => {
+    try {
+        const alerts = Alert.getRecent(req.params.deviceId, 10);
+        res.json({ ok: true, alerts });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: 'Gagal mengambil riwayat peringatan' });
+    }
+});
+
+// USER & DEVICE MANAGEMENT (SQLite)
+
+app.get('/api/users', authenticate, isAdmin, async (req, res) => {
+  const users = User.findAll();
+  res.json({ ok: true, users });
+});
+
+app.post('/api/users', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { name, username, password, role } = req.body;
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    User.create({ name, username, password, role, initials });
+    res.json({ ok: true, message: 'User berhasil ditambah' });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: 'Gagal menambah user' });
+  }
+});
+
+app.delete('/api/users/:id', authenticate, isAdmin, async (req, res) => {
+  User.delete(req.params.id);
+  res.json({ ok: true, message: 'User berhasil dihapus' });
+});
+
+app.get('/api/devices', authenticate, async (req, res) => {
+  const dbDevices = Device.findAll();
+  res.json({ ok: true, devices: dbDevices });
+});
+
+app.post('/api/devices', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { deviceId, name } = req.body;
+    Device.create({ deviceId, name });
+    res.json({ ok: true, message: 'Perangkat berhasil terdaftar' });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: 'Gagal mendaftar perangkat' });
+  }
+});
+
+app.delete('/api/devices/:id', authenticate, isAdmin, async (req, res) => {
+  Device.delete(req.params.id);
+  res.json({ ok: true, message: 'Perangkat berhasil dihapus' });
+});
+
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
+  const user = User.findOne({ username });
+  
+  if (user && await bcrypt.compare(password, user.password)) {
+    const token = jwt.sign(
+      { id: user.id, username: user.username, role: user.role, name: user.name }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '7d' }
+    );
+    res.json({ ok: true, token, user: { name: user.name, role: user.role, username: user.username } });
   } else {
-    res.status(401).json({ ok: false, error: 'Password lama salah!' });
+    res.status(401).json({ ok: false, error: 'Username atau Password salah!' });
   }
 });
 
@@ -202,8 +281,6 @@ app.post('/api/password', (req, res) => {
 //  START SERVER
 // ============================================================
 server.listen(PORT, () => {
-  console.log(`\n🚀 Inkubator Backend running on http://localhost:${PORT}`);
-  console.log(`📡 WebSocket ready at ws://localhost:${PORT}`);
-  console.log(`🌐 Web dashboard: http://localhost:${PORT}`);
-  console.log(`📋 API docs: http://localhost:${PORT}/api/status\n`);
+  console.log(`\n🚀 SleepWell Backend (SQLite) running on http://localhost:${PORT}`);
+  console.log(`🌐 API ready, Database local: sleepwell.db\n`);
 });
