@@ -1,50 +1,60 @@
-# 🌙 SleepWell Ultimate: IoT Smart Nightlight
-> ⚠️ **CATATAN**: Website ini adalah versi uji coba (Coba-Coba) untuk keperluan pengembangan dan lomba.
+# 🛡️ MoldGuard AI - Portable Mold Scanner & Forecaster
 
-SleepWell adalah sistem lampu tidur pintar berbasis IoT yang dirancang untuk membantu pencegahan nyamuk menggunakan frekuensi ultrasonik dan spektrum cahaya khusus, sekaligus memonitor kondisi ruangan secara real-time.
-
-## 🚀 Cara Menjalankan Sistem (Localhost)
-
-Sistem ini sekarang terintegrasi dalam satu repository. Ikuti langkah berikut:
-
-### 1. Backend (Node.js)
-*   Buka terminal di folder `backend`.
-*   Jalankan perintah:
-    ```bash
-    npm install
-    npm start
-    ```
-*   Server berjalan di `http://localhost:3000`.
-
-### 2. Frontend (React + Vite)
-*   Buka terminal di folder root (`SleepWell-Website`).
-*   Jalankan perintah:
-    ```bash
-    npm install
-    npm run dev
-    ```
-*   Buka dashboard di: `http://localhost:5173`.
-*   **Login Password**: `admin`
-
-### 4. Legacy Web Version (Opsional)
-Jika ingin menjalankan web versi lama (HTML/JS statis):
-*   Masuk ke folder `web`.
-*   Jalankan perintah: `python -m http.server 8000`.
-*   Buka di browser: `http://localhost:8000`.
-
-### 3. Firmware (ESP32)
-*   File kodingan ada di folder `esp/inkubator_dummy/`.
-*   Buka menggunakan Arduino IDE, install library `PubSubClient`, `ArduinoJson`, `WiFiManager`, dan `DHT sensor library`.
-*   Upload ke board ESP32 kamu.
+Selamat datang di repositori **MoldGuard AI**! Sistem ini dirancang untuk mendeteksi risiko pertumbuhan jamur di berbagai area menggunakan sensor IoT (ESP32) dan kecerdasan buatan (Machine Learning).
 
 ---
 
-## 🛠️ Fitur "Gacor" SleepWell
-*   **Real-time Sensor Hub**: Monitoring 6x Ultrasonik + 1x DHT Suhu secara bersamaan.
-*   **Smart Automation**: Lampu dengan preset warna anti-nyamuk.
-*   **Security Login**: Dashboard aman dengan proteksi password.
-*   **Remote Settings**: Fitur ganti WiFi ESP32 langsung dari halaman dashboard.
-*   **Hardware Heartbeat**: Indikator status koneksi fisik alat (Online/Offline).
+## 🚀 Cara Menjalankan Sistem (Quick Start)
+
+Untuk menjalankan sistem secara keseluruhan, ikuti langkah-langkah berikut:
+
+### 1. Jalankan Backend (Server & Database)
+Server ini berfungsi mengelola data dari MQTT (HiveMQ Cloud) dan menyimpannya ke database SQLite.
+1. Buka terminal baru.
+2. Masuk ke folder backend: `cd backend`
+3. Jalankan server: `npm run dev`
+   - **URL Backend**: `http://localhost:3000`
+   - **Status**: Cek apakah muncul pesan `[MQTT] ✅ Terhubung ke HiveMQ Cloud Broker`.
+
+### 2. Jalankan Frontend (Dashboard Web)
+Dashboard web digunakan untuk memantau data secara real-time dan melakukan analisis AI.
+1. Buka terminal baru lagi.
+2. Masuk ke folder root (SleepWell-Website): `cd ..` (jika tadi di backend)
+3. Jalankan web: `npm run dev`
+   - **URL Web**: `http://localhost:5173`
+4. Login menggunakan akun yang sudah terdaftar.
+
+### 3. Persiapan Hardware (ESP32)
+1. Buka folder `esp/mold_scanner_pro/` di Arduino IDE.
+2. Pastikan library berikut sudah terinstall:
+   - `WiFiManager`
+   - `PubSubClient` (untuk MQTT)
+   - `ArduinoJson`
+   - `DHT sensor library`
+3. Flash file `mold_scanner_pro.ino` ke ESP32 kamu.
+4. **Baud Rate**: Set Serial Monitor ke `9600`.
 
 ---
-*Dibuat oleh Tim SleepWell (fanTaux & alvinrw).*
+
+## 💡 Fitur Utama
+
+- **Majority Voting AI**: Hasil scan tidak hanya berdasarkan data instan, tapi hasil voting dari puluhan sampel selama durasi scan (15s/30s/1menit) untuk hasil yang sangat stabil.
+- **Smart LED Indicator**:
+  - **NYALA TERUS (Solid)**: Semua sensor (DHT & LDR) sehat. ✅✅
+  - **KEDIP-KEDIP (Blinking)**: Salah satu sensor error. ⚠️
+  - **MATI (Off)**: Semua sensor error. ❌❌
+- **Live Device Logs**: Pantau data mentah (JSON) langsung dari ESP32 di bagian bawah dashboard web.
+- **WiFi Manager**: Ganti jaringan WiFi langsung dari dashboard web tanpa flash ulang.
+
+---
+
+## 📁 Struktur Folder
+
+- `/backend`: Node.js server, API, dan integrasi MQTT.
+- `/src`: Source code Frontend (React + Tailwind).
+- `/esp`: Firmware untuk perangkat ESP32.
+- `/referensi`: Model AI `.pkl` dan script inferensi asli.
+
+---
+
+**Dibuat dengan ❤️ untuk Kompetisi IoT Lomba**

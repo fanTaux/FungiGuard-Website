@@ -11,6 +11,7 @@ export default function SettingsPage() {
   const [devicesList, setDevicesList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isScanning, setIsScanning] = useState(false);
+  const [scanFallbackTimer, setScanFallbackTimer] = useState(null);
 
   // Modal states
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
@@ -71,10 +72,11 @@ export default function SettingsPage() {
     fetchData();
   }, [token]);
 
-  // Reset isScanning when wifi_list changes
+  // Reset isScanning when wifi_list changes (with at least 1 network)
   useEffect(() => {
-    if (state?.wifi_list?.length > 0) {
+    if (state?.wifi_list?.length > 0 && isScanning) {
       setIsScanning(false);
+      setScanFallbackTimer(prev => { clearTimeout(prev); return null; });
     }
   }, [state?.wifi_list]);
 
@@ -167,13 +169,11 @@ export default function SettingsPage() {
 
   const handleUpdateWifi = async (e) => {
     e.preventDefault();
-    if (!newWifiSSID || !newWifiPass) return;
-    if (confirm(`Kirim konfigurasi WiFi baru ke ${state.wifi_ssid}? ESP32 akan restart.`)) {
-      sendCommand({ command: 'update_wifi', wifi_ssid: newWifiSSID, wifi_pass: newWifiPass });
-      setIsChangeWifiOpen(false);
-      setNewWifiSSID(''); setNewWifiPass('');
-      alert('Perintah ganti WiFi terkirim! ESP32 sedang mencoba terhubung ke jaringan baru.');
-    }
+    if (!newWifiSSID) return;
+    sendCommand({ command: 'change_wifi', ssid: newWifiSSID, password: newWifiPass });
+    setIsChangeWifiOpen(false);
+    setNewWifiSSID(''); setNewWifiPass('');
+    alert('Perintah ganti WiFi terkirim! ESP32 sedang mencoba terhubung ke jaringan baru.');
   };
 
   const handleResetWifi = () => {
@@ -184,13 +184,18 @@ export default function SettingsPage() {
   };
 
   const handleScanWifi = () => {
+    if (isScanning) return;
     setIsScanning(true);
     sendCommand({ command: 'scan_wifi' });
-    
-    // Auto stop scanning animation after 10s if no response
-    setTimeout(() => {
-        setIsScanning(false);
-    }, 10000);
+    // Fallback: hentikan loading setelah 20 detik jika tidak ada respon
+    const fallbackTimer = setTimeout(() => setIsScanning(false), 20000);
+    // Simpan timer agar bisa dibersihkan jika wifi_list sudah datang
+    setScanFallbackTimer(prev => { clearTimeout(prev); return fallbackTimer; });
+  };
+
+  const handleOpenWifiModal = () => {
+    setIsChangeWifiOpen(true);
+    handleScanWifi(); // Langsung scan WiFi saat buka modal
   };
 
   const handleAction = (action, item) => {
@@ -367,7 +372,7 @@ export default function SettingsPage() {
 
         <div className="flex gap-3">
           <button 
-            onClick={() => setIsChangeWifiOpen(true)}
+            onClick={handleOpenWifiModal}
             className="flex-1 bg-[#5c6b54] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#4a5743] transition-colors flex items-center justify-center gap-2 shadow-sm"
           >
             <span className="material-symbols-outlined text-sm">sync</span> Ganti Jaringan

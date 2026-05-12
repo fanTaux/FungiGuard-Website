@@ -2,7 +2,7 @@ import { useState } from 'react';
 import TopNavBar from './components/TopNavBar';
 import SensorErrorBanner from './components/SensorErrorBanner';
 import DashboardMetrics from './components/DashboardMetrics';
-import Analytics from './components/Analytics';
+// import Analytics from './components/Analytics'; // Dihapus karena sudah digabung ke Dashboard
 import Login from './components/Login';
 import SettingsPage from './components/SettingsPage';
 import ProfilePage from './components/ProfilePage';
@@ -26,22 +26,15 @@ function MainApp() {
     <>
       <TopNavBar onLogout={logout} onProfileClick={() => setActiveTab('profile')} />
       
-      {/* Top Navigation Tabs */}
+      {/* Top Navigation Tabs - Updated v2 */}
       <div className="pt-20 px-margin max-w-7xl mx-auto mb-6">
-        <div className="flex justify-between items-center bg-[#f1f8f5] p-1.5 rounded-full border border-green-100 shadow-sm max-w-lg mx-auto">
+        <div className="flex justify-between items-center bg-[#f1f8f5] p-1.5 rounded-full border border-green-100 shadow-sm max-w-sm mx-auto">
           <button 
             onClick={() => setActiveTab('dashboard')}
             className={`flex-1 py-2.5 rounded-full text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${activeTab === 'dashboard' ? 'bg-white text-[#1b4332] shadow-sm' : 'text-gray-400 hover:bg-white/50'}`}
           >
             <span className="material-symbols-outlined text-[18px]">biotech</span>
             Scanner
-          </button>
-          <button 
-            onClick={() => setActiveTab('analytics')}
-            className={`flex-1 py-2.5 rounded-full text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${activeTab === 'analytics' ? 'bg-white text-[#1b4332] shadow-sm' : 'text-gray-400 hover:bg-white/50'}`}
-          >
-            <span className="material-symbols-outlined text-[18px]">history</span>
-            History
           </button>
           <button 
             onClick={() => setActiveTab('settings')}
@@ -84,16 +77,10 @@ function MainApp() {
           </div>
         )}
 
-        {activeTab === 'analytics' && (
-          <div className="animate-fade-in">
-             <Analytics />
-          </div>
-        )}
-
         {activeTab === 'settings' && (
           <SettingsPage />
         )}
-
+        {/* Riwayat Tab Dihapus - Digabung ke Dashboard */}
         {activeTab === 'profile' && (
           <ProfilePage />
         )}

@@ -201,6 +201,7 @@ export function AppProvider({ children }) {
     sensors: activeDevice.sensors || [],
     lampColor: activeDevice.lampColor || 'putih',
     lampBrightness: activeDevice.lampBrightness || 0,
+    ldr: activeDevice.ldr || 0,
     wifi_ssid: activeDevice.wifi_ssid || 'Disconnected',
     rssi: activeDevice.rssi || 0,
     wifi_list: activeDevice.wifi_list || []
