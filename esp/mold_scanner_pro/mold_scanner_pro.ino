@@ -1,6 +1,6 @@
 /*
  * ============================================================
- *  MOLDGUARD AI - ESP32 PRO (FULL FEATURED)
+ *  FUNGIGUARD AI - ESP32 PRO (FULL FEATURED)
  *  LED: SOLID=OK, BLINK=1 Sensor Error, OFF=All Error
  *  MQTT: Kirim sensor + wifi_ssid + rssi + wifi_list
  *  Control: Terima perintah scan_wifi & change_wifi
@@ -52,7 +52,7 @@ String        pendingPass       = "";
 void setup() {
   Serial.begin(9600);
   Serial.println("\n\n========================================");
-  Serial.println("      MOLDGUARD AI BOOTING...");
+  Serial.println("      FUNGIGUARD AI BOOTING...");
   Serial.println("========================================");
 
   pinMode(LED_PIN, OUTPUT);

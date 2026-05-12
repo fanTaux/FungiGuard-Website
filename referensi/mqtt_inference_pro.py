@@ -79,7 +79,7 @@ client.loop_start()
 try:
     while True:
         print("\n" + "="*40)
-        print("      MOLDGUARD AI - MQTT PRO SCANNER")
+        print("      FUNGIGUARD AI - MQTT PRO SCANNER")
         print("="*40)
         print("1. Mulai Scan (1 Menit)")
         print("2. Mulai Scan (3 Menit)")

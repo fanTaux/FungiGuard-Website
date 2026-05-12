@@ -71,7 +71,7 @@ export default function Analytics() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.setAttribute('href', url);
-        a.setAttribute('download', `MoldGuard_Report_${new Date().toISOString().split('T')[0]}.csv`);
+        a.setAttribute('download', `FungiGuard_Report_${new Date().toISOString().split('T')[0]}.csv`);
         a.click();
     };
 

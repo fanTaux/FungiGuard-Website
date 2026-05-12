@@ -62,7 +62,7 @@ def get_sensor_from_serial(ser):
 
 def run_scanner():
     print("\n" + "="*40)
-    print("      MOLDGUARD AI REAL-TIME SCANNER")
+    print("      FUNGIGUARD AI REAL-TIME SCANNER")
     print("="*40)
 
     if not os.path.exists(MODEL_PATH):

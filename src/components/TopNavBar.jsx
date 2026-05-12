@@ -35,7 +35,7 @@ export default function TopNavBar({ onProfileClick }) {
                 <div className="w-10 h-10 bg-gradient-to-br from-[#2d6a4f] to-[#52b788] rounded-xl flex items-center justify-center shadow-lg">
                     <span className="material-symbols-outlined text-white text-2xl">biotech</span>
                 </div>
-                <span className="font-headline-lg text-headline-lg font-black text-[#1b4332] tracking-tight">MoldGuard <span className="text-[#52b788]">AI</span></span>
+                <span className="font-headline-lg text-headline-lg font-black text-[#1b4332] tracking-tight">FungiGuard <span className="text-[#52b788]">AI</span></span>
             </div>
             <div className="flex items-center gap-md">
                 <div className="hidden md:flex items-center gap-gutter">

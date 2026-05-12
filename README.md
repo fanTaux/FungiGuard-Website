@@ -1,6 +1,6 @@
-# 🛡️ MoldGuard AI - Portable Mold Scanner & Forecaster
+# 🛡️ FungiGuard AI - Portable Mold Scanner & Forecaster
 
-Selamat datang di repositori **MoldGuard AI**! Sistem ini dirancang untuk mendeteksi risiko pertumbuhan jamur di berbagai area menggunakan sensor IoT (ESP32) dan kecerdasan buatan (Machine Learning).
+Selamat datang di repositori **FungiGuard AI**! Sistem ini dirancang untuk mendeteksi risiko pertumbuhan jamur di berbagai area menggunakan sensor IoT (ESP32) dan kecerdasan buatan (Machine Learning).
 
 ---
 
