@@ -3,13 +3,25 @@ import { createContext, useContext, useEffect, useState, useRef } from 'react';
 const AppContext = createContext();
 
 export function AppProvider({ children }) {
-  const [token, setToken] = useState(localStorage.getItem('sleepwell_token') || null);
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('sleepwell_user')) || null);
+  const [token, setToken] = useState(sessionStorage.getItem('sleepwell_token') || null);
+  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem('sleepwell_user')) || null);
   
   // New Multi-Device State
   const [devices, setDevices] = useState({});
-  const [activeDeviceId, setActiveDeviceId] = useState(null);
+  const [activeDeviceId, setActiveDeviceId] = useState(sessionStorage.getItem('activeDeviceId') || null);
   const [hasNewAlert, setHasNewAlert] = useState(false);
+  const [now, setNow] = useState(Date.now());
+  
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 2000);
+    return () => clearInterval(timer);
+  }, []);
+  
+  useEffect(() => {
+    if (activeDeviceId) {
+      sessionStorage.setItem('activeDeviceId', activeDeviceId);
+    }
+  }, [activeDeviceId]);
   
   const [isConnected, setIsConnected] = useState(false);
   const ws = useRef(null);
@@ -85,7 +97,7 @@ export function AppProvider({ children }) {
                 [devId]: {
                   ...(prev[devId] || {}),
                   ...msg.data,
-                  lastSeen: Date.now()
+                  lastSeen: msg.data.lastUpdate || 0
                 }
               };
               
@@ -95,9 +107,7 @@ export function AppProvider({ children }) {
               }
 
               // AUTO-SELECT: Jika belum ada alat aktif, set alat yang baru lapor ini jadi aktif
-              if (!activeDeviceId) {
-                  setActiveDeviceId(devId);
-              }
+              setActiveDeviceId(prevActive => prevActive || devId);
               
               return updated;
             });
@@ -158,8 +168,10 @@ export function AppProvider({ children }) {
       if (data.ok) {
         setToken(data.token);
         setUser(data.user);
-        localStorage.setItem('sleepwell_token', data.token);
+        localStorage.setItem('sleepwell_token', data.token); // Tetap simpan di localStorage jika user minta persist
         localStorage.setItem('sleepwell_user', JSON.stringify(data.user));
+        sessionStorage.setItem('sleepwell_token', data.token);
+        sessionStorage.setItem('sleepwell_user', JSON.stringify(data.user));
         return { ok: true };
       }
       return { ok: false, error: data.error || 'Terjadi kesalahan' };
@@ -175,6 +187,8 @@ export function AppProvider({ children }) {
     setActiveDeviceId(null);
     localStorage.removeItem('sleepwell_token');
     localStorage.removeItem('sleepwell_user');
+    sessionStorage.removeItem('sleepwell_token');
+    sessionStorage.removeItem('sleepwell_user');
     if (ws.current) ws.current.close();
   };
 
@@ -206,7 +220,9 @@ export function AppProvider({ children }) {
     rssi: activeDevice.rssi || 0,
     wifi_list: activeDevice.wifi_list || []
   };
-  const espLastSeen = activeDevice.lastSeen || 0;
+  const espLastSeenRaw = activeDevice.lastSeen || 0;
+  const espLastSeen = typeof espLastSeenRaw === 'string' ? new Date(espLastSeenRaw).getTime() : espLastSeenRaw;
+  const isDeviceOnline = espLastSeen > 0 && (now - espLastSeen) < 15000;
 
   return (
     <AppContext.Provider value={{ 
@@ -215,7 +231,8 @@ export function AppProvider({ children }) {
         setActiveDeviceId, 
         state, 
         isConnected, 
-        espLastSeen, 
+        espLastSeen,
+        isDeviceOnline, 
         token, 
         user,
         login, 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TopNavBar from './components/TopNavBar';
 import SensorErrorBanner from './components/SensorErrorBanner';
 import DashboardMetrics from './components/DashboardMetrics';
@@ -9,7 +9,7 @@ import ProfilePage from './components/ProfilePage';
 import { AppProvider, useAppContext } from './context/AppContext';
 
 function MainApp() {
-  const { token, logout, activeDeviceId, isConnected, devices } = useAppContext();
+  const { token, logout, activeDeviceId, isConnected, devices, isDeviceOnline } = useAppContext();
   const [activeTab, setActiveTab] = useState('dashboard');
 
   if (!token) {
@@ -62,14 +62,27 @@ function MainApp() {
                      {formatDeviceName(activeDeviceId)}
                   </h1>
                </div>
-               <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl border border-gray-100 shadow-sm">
-                  <div className="relative flex items-center justify-center w-3 h-3">
-                    {isConnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#52b788] opacity-75"></span>}
-                    <span className={`relative inline-flex rounded-full w-2.5 h-2.5 ${isConnected ? 'bg-[#52b788]' : 'bg-red-500'}`}></span>
+               <div className="flex items-center gap-3">
+                  {/* ALAT */}
+                  <div className="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="relative flex items-center justify-center w-2.5 h-2.5">
+                      {isDeviceOnline && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#52b788] opacity-75"></span>}
+                      <span className={`relative inline-flex rounded-full w-2 h-2 ${isDeviceOnline ? 'bg-[#52b788]' : 'bg-red-500'}`}></span>
+                    </div>
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${isDeviceOnline ? 'text-[#52b788]' : 'text-red-500'}`}>
+                      Alat: {isDeviceOnline ? 'Online' : 'Offline'}
+                    </span>
                   </div>
-                  <span className={`text-[10px] font-black uppercase tracking-widest ${isConnected ? 'text-[#52b788]' : 'text-gray-500'}`}>
-                    AI Link: {isConnected ? <span className="text-[#52b788]">Connected</span> : <span className="text-red-500">Lost</span>}
-                  </span>
+
+                  {/* SISTEM / AI */}
+                  <div className="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="relative flex items-center justify-center w-2.5 h-2.5">
+                      <span className={`relative inline-flex rounded-full w-2 h-2 ${isConnected ? 'bg-blue-500' : 'bg-red-500'}`}></span>
+                    </div>
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${isConnected ? 'text-blue-500' : 'text-red-500'}`}>
+                      Sistem: {isConnected ? 'Ready' : 'Lost'}
+                    </span>
+                  </div>
                </div>
             </div>
             

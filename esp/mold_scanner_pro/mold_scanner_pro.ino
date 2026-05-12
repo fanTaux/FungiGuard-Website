@@ -22,7 +22,7 @@
 #define LED_PIN 25
 
 // --- IDENTITAS ALAT ---
-const String myDeviceID = "mold-scanner-01";
+const String myDeviceID = "mold-scanner-02";
 
 // --- MQTT HIVEMQ CLOUD ---
 const char* mqtt_server = "4ecff5933a704e218192a9a9390c3580.s1.eu.hivemq.cloud";
