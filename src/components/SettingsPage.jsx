@@ -5,7 +5,7 @@ export default function SettingsPage() {
   const { logout, token, user, fetchDevices, state, sendCommand, devices } = useAppContext();
   const host = window.location.hostname || 'localhost';
   const API_URL = `http://${host}:3000`;
-  
+
   // Data states
   const [usersList, setUsersList] = useState([]);
   const [devicesList, setDevicesList] = useState([]);
@@ -53,7 +53,7 @@ export default function SettingsPage() {
     setIsLoading(true);
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
-      
+
       const resUsers = await fetch(`${API_URL}/api/users`, { headers });
       const dataUsers = await resUsers.json();
       if (dataUsers.ok) setUsersList(dataUsers.users);
@@ -85,15 +85,15 @@ export default function SettingsPage() {
     try {
       const res = await fetch(`${API_URL}/api/users`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ 
-          name: newUserName, 
-          username: newUserUsername, 
-          password: newUserPassword, 
-          role: newUserRole 
+        body: JSON.stringify({
+          name: newUserName,
+          username: newUserUsername,
+          password: newUserPassword,
+          role: newUserRole
         })
       });
       const data = await res.json();
@@ -130,9 +130,9 @@ export default function SettingsPage() {
     try {
       const res = await fetch(`${API_URL}/api/devices`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ deviceId: newDeviceId, name: newDeviceName })
       });
@@ -207,21 +207,21 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-3xl mx-auto pb-12 space-y-8 animate-fade-in relative" onClick={() => setOpenDropdownId(null)}>
-      
+
       {/* Header Pengaturan */}
       <div className="mb-8 flex justify-between items-end">
         <div>
           <h2 className="text-2xl font-bold text-[#624633] mb-1">Pengaturan</h2>
-          <p className="text-sm text-gray-500">Kelola akun Anda dan konfigurasi perangkat SleepWell.</p>
+          <p className="text-sm text-gray-500">Kelola akun Anda dan konfigurasi perangkat FungiGuard.</p>
         </div>
         <div className="text-right">
-            <span className="text-[10px] font-bold text-gray-400 block mb-1 uppercase tracking-tighter">Login Sebagai</span>
-            <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${isAdmin ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
-                    {user?.role}
-                </span>
-                <span className="text-sm font-bold text-[#624633]">{user?.name}</span>
-            </div>
+          <span className="text-[10px] font-bold text-gray-400 block mb-1 uppercase tracking-tighter">Login Sebagai</span>
+          <div className="flex items-center gap-2">
+            <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${isAdmin ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
+              {user?.role}
+            </span>
+            <span className="text-sm font-bold text-[#624633]">{user?.name}</span>
+          </div>
         </div>
       </div>
 
@@ -230,16 +230,16 @@ export default function SettingsPage() {
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xs font-bold text-[#8c7462] tracking-wider uppercase">PENGELOLAAN PENGGUNA</h3>
           {isAdmin && (
-            <button 
-                onClick={() => setIsAddUserOpen(true)}
-                className="bg-[#8c7462] text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 hover:bg-[#735d4d] transition-colors shadow-sm"
+            <button
+              onClick={() => setIsAddUserOpen(true)}
+              className="bg-[#8c7462] text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 hover:bg-[#735d4d] transition-colors shadow-sm"
             >
-                <span className="material-symbols-outlined text-[14px]">add</span>
-                Tambah Anggota
+              <span className="material-symbols-outlined text-[14px]">add</span>
+              Tambah Anggota
             </button>
           )}
         </div>
-        
+
         <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-visible flex flex-col gap-[1px] bg-gray-100/50">
           {isLoading ? (
             <div className="p-8 text-center text-gray-400 text-sm italic bg-white rounded-3xl">Memuat daftar anggota...</div>
@@ -259,24 +259,24 @@ export default function SettingsPage() {
               </div>
               {isAdmin && (
                 <div className="relative">
-                    <button 
-                    onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === `u-${u.id}` ? null : `u-${u.id}`); }} 
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === `u-${u.id}` ? null : `u-${u.id}`); }}
                     className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
-                    >
+                  >
                     <span className="material-symbols-outlined">more_vert</span>
-                    </button>
-                    
-                    {/* Dropdown Menu */}
-                    {openDropdownId === `u-${u.id}` && (
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {openDropdownId === `u-${u.id}` && (
                     <div className="absolute right-0 top-10 w-36 bg-white border border-gray-100 rounded-xl shadow-lg z-20 py-1 overflow-hidden animate-fade-in">
-                        <button onClick={() => handleAction('edit', u)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-[#f8f5f1] flex items-center gap-2 font-medium">
+                      <button onClick={() => handleAction('edit', u)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-[#f8f5f1] flex items-center gap-2 font-medium">
                         <span className="material-symbols-outlined text-[16px] text-[#8c7462]">edit</span> Edit
-                        </button>
-                        <button onClick={() => handleAction('delete', u)} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium">
+                      </button>
+                      <button onClick={() => handleAction('delete', u)} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium">
                         <span className="material-symbols-outlined text-[16px]">delete</span> Hapus
-                        </button>
+                      </button>
                     </div>
-                    )}
+                  )}
                 </div>
               )}
             </div>
@@ -289,16 +289,16 @@ export default function SettingsPage() {
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xs font-bold text-[#8c7462] tracking-wider uppercase">MANAJEMEN PERANGKAT</h3>
           {isAdmin && (
-            <button 
-                onClick={() => setIsAddDeviceOpen(true)}
-                className="bg-[#8c7462] text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 hover:bg-[#735d4d] transition-colors shadow-sm"
+            <button
+              onClick={() => setIsAddDeviceOpen(true)}
+              className="bg-[#8c7462] text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 hover:bg-[#735d4d] transition-colors shadow-sm"
             >
-                <span className="material-symbols-outlined text-[14px]">add</span>
-                Tambah Perangkat
+              <span className="material-symbols-outlined text-[14px]">add</span>
+              Tambah Perangkat
             </button>
           )}
         </div>
-        
+
         <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-visible flex flex-col gap-[1px] bg-gray-100/50">
           {isLoading ? (
             <div className="p-8 text-center text-gray-400 text-sm italic bg-white rounded-3xl">Memuat daftar perangkat...</div>
@@ -307,46 +307,46 @@ export default function SettingsPage() {
           ) : devicesList.map((device) => {
             const isOnline = devices[device.deviceId]?.lastSeen && (Date.now() - devices[device.deviceId].lastSeen < 10000);
             return (
-                <div key={device.id} className="bg-white p-4 flex items-center justify-between hover:bg-gray-50 transition-colors relative first:rounded-t-3xl last:rounded-b-3xl">
+              <div key={device.id} className="bg-white p-4 flex items-center justify-between hover:bg-gray-50 transition-colors relative first:rounded-t-3xl last:rounded-b-3xl">
                 <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${device.color || 'bg-[#e6ceb3]/30 text-[#8c7462]'}`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${device.color || 'bg-[#e6ceb3]/30 text-[#8c7462]'}`}>
                     <span className="material-symbols-outlined">{device.icon || 'router'}</span>
-                    </div>
-                    <div>
+                  </div>
+                  <div>
                     <span className="font-bold text-[#624633] text-sm block">{device.name}</span>
                     <div className="flex items-center gap-1 mt-0.5">
-                        <span className="text-[10px] text-gray-400 font-bold uppercase">{device.deviceId}</span>
-                        <span className="mx-1 text-gray-300">•</span>
-                        <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]' : 'bg-gray-300'}`}></span>
-                        <p className={`text-[10px] font-medium ${isOnline ? 'text-green-600' : 'text-gray-500'}`}>
-                            {isOnline ? 'Online' : 'Offline'}
-                        </p>
+                      <span className="text-[10px] text-gray-400 font-bold uppercase">{device.deviceId}</span>
+                      <span className="mx-1 text-gray-300">•</span>
+                      <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]' : 'bg-gray-300'}`}></span>
+                      <p className={`text-[10px] font-medium ${isOnline ? 'text-green-600' : 'text-gray-500'}`}>
+                        {isOnline ? 'Online' : 'Offline'}
+                      </p>
                     </div>
-                    </div>
+                  </div>
                 </div>
                 {isAdmin && (
-                    <div className="relative">
-                        <button 
-                        onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === `d-${device.id}` ? null : `d-${device.id}`); }} 
-                        className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
-                        >
-                        <span className="material-symbols-outlined">more_vert</span>
+                  <div className="relative">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === `d-${device.id}` ? null : `d-${device.id}`); }}
+                      className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                    >
+                      <span className="material-symbols-outlined">more_vert</span>
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {openDropdownId === `d-${device.id}` && (
+                      <div className="absolute right-0 top-10 w-36 bg-white border border-gray-100 rounded-xl shadow-lg z-20 py-1 overflow-hidden animate-fade-in">
+                        <button onClick={() => handleAction('edit', device)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-[#f8f5f1] flex items-center gap-2 font-medium">
+                          <span className="material-symbols-outlined text-[16px] text-[#8c7462]">settings</span> Config
                         </button>
-    
-                        {/* Dropdown Menu */}
-                        {openDropdownId === `d-${device.id}` && (
-                        <div className="absolute right-0 top-10 w-36 bg-white border border-gray-100 rounded-xl shadow-lg z-20 py-1 overflow-hidden animate-fade-in">
-                            <button onClick={() => handleAction('edit', device)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-[#f8f5f1] flex items-center gap-2 font-medium">
-                            <span className="material-symbols-outlined text-[16px] text-[#8c7462]">settings</span> Config
-                            </button>
-                            <button onClick={() => handleAction('delete', device)} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium">
-                            <span className="material-symbols-outlined text-[16px]">link_off</span> Putus
-                            </button>
-                        </div>
-                        )}
-                    </div>
+                        <button onClick={() => handleAction('delete', device)} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium">
+                          <span className="material-symbols-outlined text-[16px]">link_off</span> Putus
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 )}
-                </div>
+              </div>
             );
           })}
         </div>
@@ -371,13 +371,13 @@ export default function SettingsPage() {
         </div>
 
         <div className="flex gap-3">
-          <button 
+          <button
             onClick={handleOpenWifiModal}
             className="flex-1 bg-[#5c6b54] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#4a5743] transition-colors flex items-center justify-center gap-2 shadow-sm"
           >
             <span className="material-symbols-outlined text-sm">sync</span> Ganti Jaringan
           </button>
-          <button 
+          <button
             onClick={handleResetWifi}
             className="flex-1 bg-white text-red-500 border border-red-200 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
           >
@@ -390,7 +390,7 @@ export default function SettingsPage() {
       <div>
         <h3 className="text-xs font-bold text-[#8c7462] tracking-wider uppercase mb-4">LAINNYA</h3>
         <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden flex flex-col gap-[1px] bg-gray-100/50">
-          
+
           <button onClick={logout} className="w-full bg-white p-4 flex items-center justify-between hover:bg-red-50 transition-colors text-left group">
             <div className="flex items-center gap-3 text-red-500 font-medium text-sm">
               <span className="material-symbols-outlined text-red-400 group-hover:text-red-500">logout</span>
@@ -412,7 +412,7 @@ export default function SettingsPage() {
             </div>
             <h2 className="text-xl font-bold text-[#624633] mb-1">Tambah Anggota</h2>
             <p className="text-xs text-gray-500 mb-6">Buat akun baru dengan memasukkan detail anggota.</p>
-            
+
             <form onSubmit={handleAddUser} className="space-y-4 text-left">
               <div>
                 <label className="block text-[10px] font-bold text-gray-500 mb-1 ml-1">Nama Lengkap</label>
@@ -426,18 +426,18 @@ export default function SettingsPage() {
                 <label className="block text-[10px] font-bold text-gray-500 mb-1 ml-1">Password</label>
                 <input type="password" value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} required placeholder="Minimal 6 karakter" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#8c7462]" />
               </div>
-              
+
               <div>
                 <label className="block text-[10px] font-bold text-gray-500 mb-1 ml-1">Peran Pengguna</label>
                 <div className="flex gap-2">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setNewUserRole('ADMIN')}
                     className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-semibold transition-all ${newUserRole === 'ADMIN' ? 'bg-[#f4ebe1] border-[#d8a878] text-[#8c7462]' : 'bg-white border-gray-200 text-gray-500'}`}
                   >
                     Admin
                   </button>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setNewUserRole('ANGGOTA')}
                     className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-semibold transition-all ${newUserRole === 'ANGGOTA' ? 'bg-[#f4ebe1] border-[#d8a878] text-[#8c7462]' : 'bg-white border-gray-200 text-gray-500'}`}
@@ -462,8 +462,8 @@ export default function SettingsPage() {
           <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setIsAddDeviceOpen(false)}></div>
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-[480px] p-8 relative z-10 animate-fade-in">
             <h2 className="text-xl font-bold text-[#624633] mb-1">Tambah Perangkat Baru</h2>
-            <p className="text-xs text-gray-500 mb-6 leading-relaxed">Masukkan detail perangkat SleepWell Anda untuk mulai menghubungkannya.</p>
-            
+            <p className="text-xs text-gray-500 mb-6 leading-relaxed">Masukkan detail perangkat FungiGuard Anda untuk mulai menghubungkannya.</p>
+
             <form onSubmit={handleAddDevice} className="space-y-4">
               <div>
                 <label className="block text-[10px] font-bold text-gray-700 mb-1 ml-1">Nama Perangkat</label>
@@ -473,7 +473,7 @@ export default function SettingsPage() {
                 <label className="block text-[10px] font-bold text-gray-700 mb-1 ml-1">ID Perangkat (Harus Sama dengan Kode ESP32)</label>
                 <input type="text" value={newDeviceId} onChange={e => setNewDeviceId(e.target.value)} required placeholder="misal: esp32_nursery_01" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#8c7462]" />
               </div>
-              
+
               <div className="flex gap-3 justify-end pt-4">
                 <button type="button" onClick={() => setIsAddDeviceOpen(false)} className="bg-white border border-gray-200 text-gray-600 px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-50">Batal</button>
                 <button type="submit" className="bg-[#8c7462] text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-[#735d4d]">Hubungkan</button>
@@ -495,11 +495,11 @@ export default function SettingsPage() {
             <p className="text-sm text-gray-600 mb-6 leading-relaxed">
               Apakah Anda yakin ingin menghapus <span className="font-bold text-red-500">{actionTarget.name}</span>? Tindakan ini tidak dapat dibatalkan.
             </p>
-            
+
             <div className="flex gap-3">
               <button onClick={() => setIsDeleteModalOpen(false)} className="flex-1 bg-white border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-50">Batal</button>
-              <button 
-                onClick={() => actionTarget.username ? handleDeleteUser(actionTarget.id) : handleDeleteDevice(actionTarget.id)} 
+              <button
+                onClick={() => actionTarget.username ? handleDeleteUser(actionTarget.id) : handleDeleteDevice(actionTarget.id)}
                 className="flex-1 bg-red-500 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-red-600 shadow-sm"
               >
                 Ya, Hapus
@@ -521,45 +521,45 @@ export default function SettingsPage() {
             </div>
             <h2 className="text-xl font-bold text-[#624633] mb-1">Konfigurasi WiFi Baru</h2>
             <p className="text-xs text-gray-500 mb-6">Pilih jaringan yang tersedia atau masukkan manual.</p>
-            
+
             <div className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Jaringan Terdeteksi</span>
-                    <button 
-                        onClick={handleScanWifi}
-                        disabled={isScanning}
-                        className="text-[10px] font-bold text-blue-500 hover:underline flex items-center gap-1 disabled:text-gray-400"
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Jaringan Terdeteksi</span>
+                <button
+                  onClick={handleScanWifi}
+                  disabled={isScanning}
+                  className="text-[10px] font-bold text-blue-500 hover:underline flex items-center gap-1 disabled:text-gray-400"
+                >
+                  <span className={`material-symbols-outlined text-[12px] ${isScanning ? 'animate-spin' : ''}`}>sync</span>
+                  Scan Ulang
+                </button>
+              </div>
+              <div className="max-h-40 overflow-y-auto border border-gray-100 rounded-xl bg-gray-50/50 p-2 space-y-1">
+                {state.wifi_list?.length > 0 ? (
+                  state.wifi_list.map((net, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setNewWifiSSID(net.ssid)}
+                      className="w-full text-left p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all flex items-center justify-between group"
                     >
-                        <span className={`material-symbols-outlined text-[12px] ${isScanning ? 'animate-spin' : ''}`}>sync</span>
-                        Scan Ulang
+                      <div className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-gray-400 text-sm group-hover:text-[#667b68]">wifi</span>
+                        <span className="text-xs font-medium text-gray-700">{net.ssid}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {net.secure && <span className="material-symbols-outlined text-[10px] text-gray-400">lock</span>}
+                        <span className="text-[10px] font-bold text-gray-400">{net.rssi} dBm</span>
+                      </div>
                     </button>
-                </div>
-                <div className="max-h-40 overflow-y-auto border border-gray-100 rounded-xl bg-gray-50/50 p-2 space-y-1">
-                    {state.wifi_list?.length > 0 ? (
-                        state.wifi_list.map((net, idx) => (
-                            <button 
-                                key={idx}
-                                onClick={() => setNewWifiSSID(net.ssid)}
-                                className="w-full text-left p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all flex items-center justify-between group"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <span className="material-symbols-outlined text-gray-400 text-sm group-hover:text-[#667b68]">wifi</span>
-                                    <span className="text-xs font-medium text-gray-700">{net.ssid}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    {net.secure && <span className="material-symbols-outlined text-[10px] text-gray-400">lock</span>}
-                                    <span className="text-[10px] font-bold text-gray-400">{net.rssi} dBm</span>
-                                </div>
-                            </button>
-                        ))
-                    ) : (
-                        <div className="py-8 text-center">
-                            <p className="text-[10px] text-gray-400 italic">
-                                {isScanning ? 'Sedang memindai...' : 'Klik Scan untuk mencari jaringan'}
-                            </p>
-                        </div>
-                    )}
-                </div>
+                  ))
+                ) : (
+                  <div className="py-8 text-center">
+                    <p className="text-[10px] text-gray-400 italic">
+                      {isScanning ? 'Sedang memindai...' : 'Klik Scan untuk mencari jaringan'}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
 
             <form onSubmit={handleUpdateWifi} className="space-y-4 text-left">
@@ -571,7 +571,7 @@ export default function SettingsPage() {
                 <label className="block text-[10px] font-bold text-gray-500 mb-1 ml-1">Password WiFi</label>
                 <input type="password" value={newWifiPass} onChange={e => setNewWifiPass(e.target.value)} required placeholder="Masukkan Password" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#8c7462]" />
               </div>
-              
+
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={() => setIsChangeWifiOpen(false)} className="flex-1 bg-white border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-50">Batal</button>
                 <button type="submit" className="flex-1 bg-[#5c6b54] text-white py-2.5 rounded-xl text-sm font-bold hover:bg-[#4a5743]">Update WiFi</button>

@@ -25,7 +25,7 @@ export default function ProfilePage() {
                 src={user.avatar}
               />
             ) : (
-              <span className="text-4xl font-black text-white">{user?.name?.substring(0,2).toUpperCase()}</span>
+              <span className="text-4xl font-black text-white">{user?.name?.substring(0, 2).toUpperCase()}</span>
             )}
             <button className="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-[10px] font-bold py-1 backdrop-blur-sm hover:bg-black/60 transition-colors">
               Ubah Foto
@@ -35,7 +35,7 @@ export default function ProfilePage() {
 
         <div className="relative z-10 flex-1 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-            <h3 className="text-3xl font-black text-[#624633]">{user?.name || 'User SleepWell'}</h3>
+            <h3 className="text-3xl font-black text-[#624633]">{user?.name || 'User FungiGuard'}</h3>
             <span className="material-symbols-outlined text-[#4ade80] text-xl" title="Akun Terverifikasi">verified</span>
           </div>
           <p className="text-sm font-semibold text-[#8c7462] mb-4">@{user?.username || 'username'}</p>
