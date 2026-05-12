@@ -176,7 +176,7 @@ export default function DashboardMetrics() {
 
         const riskPercent = { 0: 15, 1: 50, 2: 90 }[finalRisk] ?? 15;
         const labels = [
-            { level: 'Rendah', color: 'text-green-500', bg: 'bg-green-50', icon: 'check_circle',
+            { level: 'Rendah', color: 'text-orange-500', bg: 'bg-orange-50', icon: 'check_circle',
               desc: `Area ${locName} relatif aman. Kondisi lingkungan bersih dan tidak mendukung pertumbuhan jamur.` },
             { level: 'Waspada', color: 'text-orange-500', bg: 'bg-orange-50', icon: 'error',
               desc: `Area ${locName} terdeteksi cukup lembap. Tingkatkan ventilasi dan periksa kebocoran secara berkala.` },
@@ -271,11 +271,11 @@ export default function DashboardMetrics() {
                     <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm relative overflow-hidden">
                         
                         <div className="flex items-center gap-4 mb-10">
-                            <div className="w-14 h-14 bg-[#f1f8f5] rounded-2xl flex items-center justify-center text-[#2d6a4f] shadow-inner">
+                            <div className="w-14 h-14 bg-[#f4ebe1] rounded-2xl flex items-center justify-center text-[#735d4d] shadow-inner">
                                 <span className="material-symbols-outlined text-3xl font-bold">query_stats</span>
                             </div>
                             <div>
-                                <h2 className="font-black text-[#1b4332] text-2xl tracking-tight uppercase">Mold AI Scanner</h2>
+                                <h2 className="font-black text-[#624633] text-2xl tracking-tight uppercase">Mold AI Scanner</h2>
                                 <p className="text-xs text-gray-400 font-bold tracking-widest">SETUP ANALISIS AREA</p>
                             </div>
                         </div>
@@ -283,15 +283,15 @@ export default function DashboardMetrics() {
                         {/* STEP 1: LOCATION */}
                         <div className="mb-8">
                             <div className="flex items-center gap-2 mb-4">
-                                <span className="w-6 h-6 rounded-full bg-[#1b4332] text-white text-[10px] font-black flex items-center justify-center">1</span>
-                                <h3 className="text-xs font-black text-[#1b4332] uppercase tracking-wider">Pilih Lokasi Objek</h3>
+                                <span className="w-6 h-6 rounded-full bg-[#624633] text-white text-[10px] font-black flex items-center justify-center">1</span>
+                                <h3 className="text-xs font-black text-[#624633] uppercase tracking-wider">Pilih Lokasi Objek</h3>
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {locations.map(loc => (
                                     <button 
                                         key={loc}
                                         onClick={() => setScanLocation(loc)}
-                                        className={`px-4 py-2.5 rounded-xl text-[10px] font-black transition-all border-2 ${scanLocation === loc ? 'bg-[#1b4332] text-white border-[#1b4332] shadow-lg' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}`}
+                                        className={`px-4 py-2.5 rounded-xl text-[10px] font-black transition-all border-2 ${scanLocation === loc ? 'bg-[#624633] text-white border-[#624633] shadow-lg' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}`}
                                     >
                                         {loc}
                                     </button>
@@ -305,7 +305,7 @@ export default function DashboardMetrics() {
                                         value={customLocation}
                                         onChange={(e) => setCustomLocation(e.target.value)}
                                         placeholder="Ketik lokasi (misal: Kamar Mandi)..."
-                                        className="w-full bg-[#f1f8f5] border-2 border-[#52b788]/20 rounded-xl px-4 py-3 text-xs font-bold text-[#1b4332] focus:border-[#52b788] focus:outline-none transition-all"
+                                        className="w-full bg-[#f4ebe1] border-2 border-[#8c7462]/20 rounded-xl px-4 py-3 text-xs font-bold text-[#624633] focus:border-[#8c7462] focus:outline-none transition-all"
                                     />
                                 </div>
                             )}
@@ -315,27 +315,27 @@ export default function DashboardMetrics() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                             <div>
                                 <div className="flex items-center gap-2 mb-4">
-                                    <span className="w-6 h-6 rounded-full bg-[#1b4332] text-white text-[10px] font-black flex items-center justify-center">2</span>
-                                    <h3 className="text-xs font-black text-[#1b4332] uppercase tracking-wider">Catatan</h3>
+                                    <span className="w-6 h-6 rounded-full bg-[#624633] text-white text-[10px] font-black flex items-center justify-center">2</span>
+                                    <h3 className="text-xs font-black text-[#624633] uppercase tracking-wider">Catatan</h3>
                                 </div>
                                 <textarea 
                                     value={scanNotes}
                                     onChange={(e) => setScanNotes(e.target.value)}
                                     placeholder="Kondisi area..."
-                                    className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 text-xs font-bold text-[#1b4332] focus:border-[#52b788] focus:outline-none transition-all placeholder:text-gray-300 resize-none h-[108px]"
+                                    className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 text-xs font-bold text-[#624633] focus:border-[#8c7462] focus:outline-none transition-all placeholder:text-gray-300 resize-none h-[108px]"
                                 ></textarea>
                             </div>
                             <div>
                                 <div className="flex items-center gap-2 mb-4">
-                                    <span className="w-6 h-6 rounded-full bg-[#1b4332] text-white text-[10px] font-black flex items-center justify-center">3</span>
-                                    <h3 className="text-xs font-black text-[#1b4332] uppercase tracking-wider">Durasi</h3>
+                                    <span className="w-6 h-6 rounded-full bg-[#624633] text-white text-[10px] font-black flex items-center justify-center">3</span>
+                                    <h3 className="text-xs font-black text-[#624633] uppercase tracking-wider">Durasi</h3>
                                 </div>
                                 <div className="space-y-2">
                                     {durations.map(d => (
                                         <button 
                                             key={d}
                                             onClick={() => setScanDuration(d)}
-                                            className={`w-full py-3 rounded-xl text-[10px] font-black transition-all border-2 ${scanDuration === d ? 'bg-[#52b788] text-white border-[#52b788] shadow-md' : 'bg-gray-50 text-gray-400 border-transparent hover:bg-gray-100'}`}
+                                            className={`w-full py-3 rounded-xl text-[10px] font-black transition-all border-2 ${scanDuration === d ? 'bg-[#8c7462] text-white border-[#8c7462] shadow-md' : 'bg-gray-50 text-gray-400 border-transparent hover:bg-gray-100'}`}
                                         >
                                             {d >= 60 ? '1 MENIT' : `${d} DETIK`}
                                         </button>
@@ -347,7 +347,7 @@ export default function DashboardMetrics() {
                         <div className="relative flex flex-col items-center">
                             {/* FULL-PAGE SCANNING OVERLAY */}
                             {isScanning && (
-                                <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#1b4332]/90 backdrop-blur-sm animate-fade-in">
+                                <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#624633]/90 backdrop-blur-sm animate-fade-in">
                                     <div className="relative flex flex-col items-center gap-8">
                                         {/* Circular Progress Ring */}
                                         <div className="relative w-52 h-52">
@@ -355,7 +355,7 @@ export default function DashboardMetrics() {
                                                 <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="12"/>
                                                 <circle 
                                                     cx="100" cy="100" r="88" fill="none" 
-                                                    stroke="#52b788" strokeWidth="12"
+                                                    stroke="#8c7462" strokeWidth="12"
                                                     strokeLinecap="round"
                                                     strokeDasharray={`${2 * Math.PI * 88}`}
                                                     strokeDashoffset={`${2 * Math.PI * 88 * (1 - scanProgress / 100)}`}
@@ -392,7 +392,7 @@ export default function DashboardMetrics() {
                             <button 
                                 onClick={startScan}
                                 disabled={!scanLocation || (scanLocation === 'Lainnya' && !customLocation) || isScanning}
-                                className={`w-full py-5 rounded-3xl font-black text-xs uppercase tracking-[0.3em] shadow-xl transition-all flex items-center justify-center gap-3 ${(!scanLocation || (scanLocation === 'Lainnya' && !customLocation) || isScanning) ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-[#1b4332] hover:bg-[#2d6a4f] text-white active:scale-95 shadow-green-900/20'}`}
+                                className={`w-full py-5 rounded-3xl font-black text-xs uppercase tracking-[0.3em] shadow-xl transition-all flex items-center justify-center gap-3 ${(!scanLocation || (scanLocation === 'Lainnya' && !customLocation) || isScanning) ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-[#624633] hover:bg-[#735d4d] text-white active:scale-95 shadow-orange-900/20'}`}
                             >
                                 <span className="material-symbols-outlined">analytics</span>
                                 Mulai Analisis AI
@@ -405,24 +405,24 @@ export default function DashboardMetrics() {
                 <div className="lg:col-span-5 space-y-6">
                     <div className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm">
                         <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                             <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
                              Real-time Environment
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="bg-[#f1f8f5] p-5 rounded-3xl border border-green-50 shadow-inner">
-                                <span className="material-symbols-outlined text-[#2d6a4f] text-2xl mb-2">water_drop</span>
+                            <div className="bg-[#f4ebe1] p-5 rounded-3xl border border-orange-50 shadow-inner">
+                                <span className="material-symbols-outlined text-[#735d4d] text-2xl mb-2">water_drop</span>
                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Lembap</p>
-                                <p className="text-2xl font-black text-[#1b4332]">{hum.toFixed(0)}%</p>
+                                <p className="text-2xl font-black text-[#624633]">{hum.toFixed(0)}%</p>
                             </div>
                             <div className="bg-[#fffdfb] p-5 rounded-3xl border border-orange-50 shadow-inner">
                                 <span className="material-symbols-outlined text-orange-400 text-2xl mb-2">thermostat</span>
                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Suhu</p>
-                                <p className="text-2xl font-black text-[#1b4332]">{temp.toFixed(1)}°C</p>
+                                <p className="text-2xl font-black text-[#624633]">{temp.toFixed(1)}°C</p>
                             </div>
                             <div className="bg-blue-50/30 p-5 rounded-3xl border border-blue-50 shadow-inner">
                                 <span className="material-symbols-outlined text-blue-400 text-2xl mb-2">light_mode</span>
                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Cahaya</p>
-                                <p className="text-2xl font-black text-[#1b4332]">{state.ldr || 0}</p>
+                                <p className="text-2xl font-black text-[#624633]">{state.ldr || 0}</p>
                             </div>
                         </div>
                         
@@ -439,7 +439,7 @@ export default function DashboardMetrics() {
                                         }}
                                     ></div>
                                 </div>
-                                <span className={`text-[10px] font-black ${currentRiskValue > 70 ? 'text-red-500' : currentRiskValue > 40 ? 'text-orange-500' : 'text-green-500'}`}>
+                                <span className={`text-[10px] font-black ${currentRiskValue > 70 ? 'text-red-500' : currentRiskValue > 40 ? 'text-orange-500' : 'text-orange-500'}`}>
                                     {state.aiLabel || 'WAITING'}
                                 </span>
                              </div>
@@ -449,7 +449,7 @@ export default function DashboardMetrics() {
                     {/* MOLD RISK RESULT (The Voted Result) */}
                     {scanResult ? (
                         <div className="animate-bounce-in space-y-6">
-                            <div className="bg-[#1b4332] rounded-[2rem] p-8 shadow-xl flex flex-col items-center text-white relative overflow-hidden">
+                            <div className="bg-[#624633] rounded-[2rem] p-8 shadow-xl flex flex-col items-center text-white relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
                                 <h3 className="text-[10px] font-black text-green-300/50 uppercase tracking-[0.2em] mb-8 w-full">Stable Scan Result (Voted)</h3>
                                 
@@ -466,7 +466,7 @@ export default function DashboardMetrics() {
                                 </div>
                                 <div className="text-center">
                                     <p className="text-4xl font-black mb-1">{scanResult.risk}%</p>
-                                    <p className={`text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full inline-block ${scanResult.risk > 70 ? 'bg-red-500/20 text-red-400' : scanResult.risk > 40 ? 'bg-orange-500/20 text-orange-400' : 'bg-green-500/20 text-green-400'}`}>
+                                    <p className={`text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full inline-block ${scanResult.risk > 70 ? 'bg-red-500/20 text-red-400' : scanResult.risk > 40 ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-500/20 text-green-400'}`}>
                                         {scanResult.label}
                                     </p>
                                 </div>
@@ -480,8 +480,8 @@ export default function DashboardMetrics() {
                                     </div>
                                     <h4 className={`font-black text-[10px] uppercase tracking-[0.2em] ${scanResult.color}`}>AI Scan Complete</h4>
                                 </div>
-                                <p className="text-lg font-black text-[#1b4332] mb-1 leading-tight">{scanResult.level}!</p>
-                                <p className="text-xs font-bold text-[#1b4332]/70 leading-relaxed">{scanResult.desc}</p>
+                                <p className="text-lg font-black text-[#624633] mb-1 leading-tight">{scanResult.level}!</p>
+                                <p className="text-xs font-bold text-[#624633]/70 leading-relaxed">{scanResult.desc}</p>
                             </div>
                         </div>
                     ) : (
@@ -497,7 +497,7 @@ export default function DashboardMetrics() {
 
             </div>
             {/* LIVE DEVICE LOGS (FOOTER SECTION) */}
-            <div className="mt-12 bg-[#1b4332] rounded-[2.5rem] p-8 shadow-2xl border-4 border-white overflow-hidden relative">
+            <div className="mt-12 bg-[#624633] rounded-[2.5rem] p-8 shadow-2xl border-4 border-white overflow-hidden relative">
                 <div className="absolute top-0 right-0 p-8 opacity-10">
                     <span className="material-symbols-outlined text-9xl text-white">terminal</span>
                 </div>
@@ -512,7 +512,7 @@ export default function DashboardMetrics() {
                             <p className="text-[10px] font-bold text-green-300/50 uppercase tracking-[0.2em]">Raw MQTT Data Stream</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 rounded-full border border-green-500/20">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-orange-500/10 rounded-full border border-orange-500/20">
                         <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                         <span className="text-[10px] font-black text-green-400 uppercase tracking-widest">ESP32 Connected</span>
                     </div>
@@ -559,11 +559,11 @@ export default function DashboardMetrics() {
             <div className="mt-10">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[#1b4332] rounded-2xl flex items-center justify-center">
+                        <div className="w-10 h-10 bg-[#624633] rounded-2xl flex items-center justify-center">
                             <span className="material-symbols-outlined text-white text-lg">history</span>
                         </div>
                         <div>
-                            <h2 className="font-black text-[#1b4332] text-lg tracking-tight uppercase">Riwayat Scan</h2>
+                            <h2 className="font-black text-[#624633] text-lg tracking-tight uppercase">Riwayat Scan</h2>
                             <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Hasil Analisis Tersimpan</p>
                         </div>
                     </div>
@@ -583,34 +583,34 @@ export default function DashboardMetrics() {
                         <span className="material-symbols-outlined text-4xl text-gray-200 block mb-3">folder_off</span>
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Belum ada riwayat scan</p>
                         <p className="text-[10px] text-gray-300 mt-1 max-w-[200px] mx-auto">Mulai analisis di atas untuk menyimpan hasil scan pertama Anda ke database.</p>
-                        <button onClick={() => fetchHistory()} className="mt-4 text-[9px] font-black text-[#52b788] uppercase tracking-widest hover:underline">Cek Ulang Data</button>
+                        <button onClick={() => fetchHistory()} className="mt-4 text-[9px] font-black text-[#8c7462] uppercase tracking-widest hover:underline">Cek Ulang Data</button>
                     </div>
                 ) : (
                     <div className="space-y-3">
                         {scanHistory.map((scan) => {
                             const date = new Date(scan.timestamp).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-                            const riskColor = scan.riskLevel > 70 ? 'bg-red-50 text-red-600' : scan.riskLevel > 40 ? 'bg-orange-50 text-orange-600' : 'bg-green-50 text-green-600';
+                            const riskColor = scan.riskLevel > 70 ? 'bg-red-50 text-red-600' : scan.riskLevel > 40 ? 'bg-orange-50 text-orange-600' : 'bg-orange-50 text-green-600';
                             const riskLabel = scan.riskLevel > 70 ? 'HIGH' : scan.riskLevel > 40 ? 'MEDIUM' : 'LOW';
                             return (
                                 <div key={scan.id} onClick={() => setSelectedScan(scan)}
-                                    className="bg-white rounded-2xl p-5 border border-gray-100 flex items-center gap-5 hover:shadow-md hover:border-green-100 transition-all cursor-pointer group">
+                                    className="bg-white rounded-2xl p-5 border border-gray-100 flex items-center gap-5 hover:shadow-md hover:border-orange-100 transition-all cursor-pointer group">
                                     <div className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center shrink-0 ${riskColor}`}>
                                         <span className="text-xl font-black leading-none">{scan.riskLevel}%</span>
                                         <span className="text-[8px] font-black uppercase tracking-widest mt-0.5">{riskLabel}</span>
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <span className="px-2 py-0.5 bg-[#1b4332] text-white text-[9px] font-black rounded-lg uppercase">{scan.location}</span>
+                                            <span className="px-2 py-0.5 bg-[#624633] text-white text-[9px] font-black rounded-lg uppercase">{scan.location}</span>
                                             <span className="text-[9px] text-gray-300 font-bold">{date}</span>
                                         </div>
-                                        <p className="text-xs font-bold text-[#1b4332] truncate">{scan.message}</p>
+                                        <p className="text-xs font-bold text-[#624633] truncate">{scan.message}</p>
                                         <div className="flex gap-3 mt-1 text-[10px] text-gray-400 font-bold">
                                             <span>🌡 {scan.temperature?.toFixed(1)}°C</span>
                                             <span>💧 {scan.humidity?.toFixed(0)}%</span>
                                             <span>⏱ {scan.duration}s</span>
                                         </div>
                                     </div>
-                                    <span className="material-symbols-outlined text-gray-200 group-hover:text-[#1b4332] transition-colors">chevron_right</span>
+                                    <span className="material-symbols-outlined text-gray-200 group-hover:text-[#624633] transition-colors">chevron_right</span>
                                 </div>
                             );
                         })}
@@ -620,9 +620,9 @@ export default function DashboardMetrics() {
 
             {/* DETAIL MODAL */}
             {selectedScan && (
-                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-[#1b4332]/40 backdrop-blur-sm animate-fade-in">
+                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-[#624633]/40 backdrop-blur-sm animate-fade-in">
                     <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col animate-bounce-in">
-                        <div className="bg-[#1b4332] p-7 text-white relative">
+                        <div className="bg-[#624633] p-7 text-white relative">
                             <button onClick={() => setSelectedScan(null)}
                                 className="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all">
                                 <span className="material-symbols-outlined text-sm">close</span>
@@ -639,24 +639,24 @@ export default function DashboardMetrics() {
                                 <div className="relative w-40 h-20 overflow-hidden mb-3">
                                     <div className="w-40 h-40 rounded-full border-[16px] border-gray-100"></div>
                                     <div className="absolute top-0 left-0 w-40 h-40 rounded-full border-[16px] transition-all duration-1000"
-                                        style={{ borderColor: selectedScan.riskLevel > 70 ? '#dc2626' : selectedScan.riskLevel > 40 ? '#f97316' : '#52b788',
+                                        style={{ borderColor: selectedScan.riskLevel > 70 ? '#dc2626' : selectedScan.riskLevel > 40 ? '#f97316' : '#8c7462',
                                             clipPath:'polygon(0 0,100% 0,100% 50%,0 50%)',
                                             transform:`rotate(${(selectedScan.riskLevel/100)*180-180}deg)` }}>
                                     </div>
                                 </div>
-                                <p className="text-4xl font-black text-[#1b4332]">{selectedScan.riskLevel}%</p>
+                                <p className="text-4xl font-black text-[#624633]">{selectedScan.riskLevel}%</p>
                                 <span className={`text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full mt-1 ${
-                                    selectedScan.riskLevel > 70 ? 'bg-red-50 text-red-600' : selectedScan.riskLevel > 40 ? 'bg-orange-50 text-orange-600' : 'bg-green-50 text-green-600'}`}>
+                                    selectedScan.riskLevel > 70 ? 'bg-red-50 text-red-600' : selectedScan.riskLevel > 40 ? 'bg-orange-50 text-orange-600' : 'bg-orange-50 text-green-600'}`}>
                                     {selectedScan.riskLevel > 70 ? 'HIGH RISK' : selectedScan.riskLevel > 40 ? 'MEDIUM RISK' : 'LOW RISK'}
                                 </span>
                             </div>
                             {/* Diagnosis */}
                             <div className="bg-[#f8fafc] p-5 rounded-2xl">
                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Diagnosis AI</p>
-                                <p className="text-sm font-bold text-[#1b4332] leading-relaxed">{selectedScan.message}</p>
+                                <p className="text-sm font-bold text-[#624633] leading-relaxed">{selectedScan.message}</p>
                                 {selectedScan.notes && (
                                     <div className="mt-3 pt-3 border-t border-gray-200">
-                                        <p className="text-[9px] font-black text-[#52b788] uppercase tracking-widest mb-1">Catatan</p>
+                                        <p className="text-[9px] font-black text-[#8c7462] uppercase tracking-widest mb-1">Catatan</p>
                                         <p className="text-xs text-gray-500 italic">&quot;{selectedScan.notes}&quot;</p>
                                     </div>
                                 )}
@@ -670,13 +670,13 @@ export default function DashboardMetrics() {
                                     <div key={label} className="bg-white border border-gray-100 p-4 rounded-2xl text-center shadow-sm">
                                         <span className={`material-symbols-outlined ${col} text-xl mb-1 block`}>{icon}</span>
                                         <p className="text-[8px] font-bold text-gray-400 uppercase">{label}</p>
-                                        <p className="text-sm font-black text-[#1b4332]">{val}</p>
+                                        <p className="text-sm font-black text-[#624633]">{val}</p>
                                     </div>
                                 ))}
                             </div>
                             {/* Rekomendasi */}
                             <div className={`p-4 rounded-2xl text-xs font-bold leading-relaxed ${
-                                selectedScan.riskLevel > 70 ? 'bg-red-50 text-red-700' : selectedScan.riskLevel > 40 ? 'bg-orange-50 text-orange-700' : 'bg-green-50 text-green-700'}`}>
+                                selectedScan.riskLevel > 70 ? 'bg-red-50 text-red-700' : selectedScan.riskLevel > 40 ? 'bg-orange-50 text-orange-700' : 'bg-orange-50 text-green-700'}`}>
                                 <p className="font-black uppercase tracking-widest text-[9px] mb-2">Rekomendasi</p>
                                 {selectedScan.riskLevel > 70 ? (
                                     <ul className="space-y-1 list-disc list-inside">
@@ -696,7 +696,7 @@ export default function DashboardMetrics() {
                         </div>
                         <div className="p-5 bg-gray-50 flex gap-3">
                             <button onClick={() => setSelectedScan(null)}
-                                className="flex-1 py-3 bg-[#1b4332] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#2d6a4f] transition-all">
+                                className="flex-1 py-3 bg-[#624633] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#735d4d] transition-all">
                                 Tutup
                             </button>
                         </div>

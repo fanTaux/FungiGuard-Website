@@ -21,20 +21,20 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #f4ebe1 0%, #fdfbf7 100%)' }}>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #fdfbf7 0%, #f4ebe1 100%)' }}>
       
       {/* Decorative element bottom right */}
-      <div className="absolute bottom-10 right-10 w-24 h-24 rounded-full bg-[#f8f5f1] border-4 border-white shadow-xl flex items-center justify-center opacity-80">
-        <span className="material-symbols-outlined text-[#8c7462] text-3xl">dark_mode</span>
+      <div className="absolute bottom-10 right-10 w-24 h-24 rounded-full bg-[#fdfbf7] border-4 border-white shadow-xl flex items-center justify-center opacity-80">
+        <span className="material-symbols-outlined text-[#8c7462] text-3xl">radar</span>
       </div>
 
-      <div className="bg-white/70 backdrop-blur-md border border-white/60 shadow-2xl w-full max-w-[400px] p-8 rounded-3xl text-center relative z-10">
-        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-gray-100">
-          <span className="material-symbols-outlined text-[#8c7462] text-3xl">eco</span>
+      <div className="bg-white/80 backdrop-blur-md border border-white/60 shadow-2xl w-full max-w-[400px] p-8 rounded-3xl text-center relative z-10">
+        <div className="w-16 h-16 bg-gradient-to-br from-[#735d4d] to-[#8c7462] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <span className="material-symbols-outlined text-white text-3xl">biotech</span>
         </div>
         
-        <h2 className="text-2xl font-bold text-[#624633] mb-1">SleepWell</h2>
-        <p className="text-xs text-gray-500 mb-8">Menciptakan malam yang tenang untuk si kecil.</p>
+        <h2 className="text-2xl font-black text-[#624633] mb-1 tracking-tight">FungiGuard <span className="text-[#8c7462]">AI</span></h2>
+        <p className="text-xs text-gray-500 mb-8">Sistem cerdas pencegah dan pemantau risiko jamur.</p>
         
         {isForgotPassword ? (
           <div className="space-y-4 text-left animate-fade-in">
@@ -142,7 +142,7 @@ export default function Login() {
 
             <div className="pt-2">
               <button type="submit" className="w-full bg-[#735d4d] text-white py-3 rounded-xl text-sm font-semibold hover:bg-[#624633] transition-colors flex justify-center items-center gap-2 shadow-md">
-                Masuk Ke SleepWell
+                Masuk Ke Sistem
                 <span className="material-symbols-outlined text-sm">login</span>
               </button>
             </div>
@@ -151,11 +151,11 @@ export default function Login() {
         )}
 
         <div className="mt-8 text-center pt-4 border-t border-gray-100/50">
-          <div className="inline-flex items-center gap-1 bg-[#f8f5f1] text-[#8c7462] px-3 py-1 rounded-full text-[10px] font-medium mb-2 border border-[#e6ceb3]/50">
+          <div className="inline-flex items-center gap-1 bg-[#f4ebe1] text-[#735d4d] px-3 py-1 rounded-full text-[10px] font-medium mb-2 border border-orange-100">
             <span className="w-1.5 h-1.5 bg-[#8c7462] rounded-full"></span>
             Sistem Terenkripsi & Aman
           </div>
-          <p className="text-[9px] text-gray-400">© 2024 SleepWell IoT. Semua Hak Dilindungi.</p>
+          <p className="text-[9px] text-gray-400">© 2024 FungiGuard AI. Semua Hak Dilindungi.</p>
         </div>
 
       </div>

@@ -35,8 +35,8 @@ export default function ProfilePage() {
 
         <div className="relative z-10 flex-1 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-            <h3 className="text-3xl font-black text-[#624633]">{user?.name || 'User FungiGuard'}</h3>
-            <span className="material-symbols-outlined text-[#4ade80] text-xl" title="Akun Terverifikasi">verified</span>
+            <h3 className="text-3xl font-black text-[#624633]">{user?.name?.replace('SleepWell', 'FungiGuard') || 'Admin FungiGuard'}</h3>
+            <span className="material-symbols-outlined text-[#8c7462] text-xl" title="Akun Terverifikasi">verified</span>
           </div>
           <p className="text-sm font-semibold text-[#8c7462] mb-4">@{user?.username || 'username'}</p>
 
@@ -55,51 +55,11 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Sleep Goals & Preferences */}
-        <section className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col h-full">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 rounded-full bg-[#f4ebe1] flex items-center justify-center text-[#8c7462]">
-              <span className="material-symbols-outlined text-sm">bedtime</span>
-            </div>
-            <h3 className="font-bold text-[#624633]">Target & Preferensi</h3>
-          </div>
-
-          <div className="space-y-5 flex-1">
-            <div>
-              <div className="flex justify-between items-end mb-2">
-                <label className="text-xs font-bold text-gray-500">Target Durasi Tidur Harian</label>
-                <span className="text-xs font-bold text-[#8c7462]">12 Jam</span>
-              </div>
-              <input type="range" min="8" max="16" defaultValue="12" className="w-full accent-[#8c7462]" />
-              <div className="flex justify-between text-[10px] text-gray-400 mt-1">
-                <span>8 Jam</span>
-                <span>16 Jam</span>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between items-end mb-2">
-                <label className="text-xs font-bold text-gray-500">Suhu Kamar Favorit</label>
-                <span className="text-xs font-bold text-[#8c7462]">25°C</span>
-              </div>
-              <input type="range" min="20" max="30" defaultValue="25" className="w-full accent-[#8c7462]" />
-              <div className="flex justify-between text-[10px] text-gray-400 mt-1">
-                <span>20°C</span>
-                <span>30°C</span>
-              </div>
-            </div>
-          </div>
-
-          <button className="w-full mt-6 bg-[#f8f5f1] text-[#8c7462] py-2.5 rounded-xl text-xs font-bold hover:bg-[#e6ceb3]/30 transition-colors border border-[#e6ceb3]/50">
-            Simpan Target
-          </button>
-        </section>
-
+      <div className="grid grid-cols-1 gap-6">
         {/* App Preferences */}
         <section className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col h-full">
           <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 rounded-full bg-[#eef3ea] flex items-center justify-center text-[#667b68]">
+            <div className="w-8 h-8 rounded-full bg-[#f8f5f1] flex items-center justify-center text-[#8c7462]">
               <span className="material-symbols-outlined text-sm">palette</span>
             </div>
             <h3 className="font-bold text-[#624633]">Preferensi Aplikasi</h3>
@@ -128,16 +88,6 @@ export default function ProfilePage() {
               </label>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-100">
-              <div>
-                <p className="text-sm font-bold text-[#624633]">Laporan Mingguan</p>
-                <p className="text-[10px] text-gray-500">Kirim statistik via Email</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" defaultChecked className="sr-only peer" />
-                <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#8c7462]"></div>
-              </label>
-            </div>
           </div>
         </section>
       </div>
@@ -167,7 +117,7 @@ export default function ProfilePage() {
           </div>
 
           <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group py-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-[#eef3ea] text-[#667b68] absolute left-0 md:left-1/2 -translate-x-1/2 shadow-sm z-10">
+            <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-[#f8f5f1] text-[#8c7462] absolute left-0 md:left-1/2 -translate-x-1/2 shadow-sm z-10">
               <span className="material-symbols-outlined text-sm">settings_remote</span>
             </div>
             <div className="w-full md:w-[calc(50%-2.5rem)] bg-gray-50 p-3 rounded-2xl border border-gray-100 shadow-sm ml-4 md:ml-0 md:group-odd:mr-4 md:group-even:ml-4">

@@ -246,7 +246,7 @@ export default function SettingsPage() {
           ) : usersList.map((u) => (
             <div key={u.id} className="bg-white p-4 flex items-center justify-between hover:bg-gray-50 transition-colors relative first:rounded-t-3xl last:rounded-b-3xl">
               <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold shadow-sm ${u.color || 'bg-[#f4f5f0] text-[#8c7462]'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold shadow-sm ${u.color || 'bg-[#f8f5f1] text-[#8c7462]'}`}>
                   {u.initials}
                 </div>
                 <div>
@@ -317,7 +317,7 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-1 mt-0.5">
                       <span className="text-[10px] text-gray-400 font-bold uppercase">{device.deviceId}</span>
                       <span className="mx-1 text-gray-300">•</span>
-                      <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]' : 'bg-gray-300'}`}></span>
+                      <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-orange-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]' : 'bg-gray-300'}`}></span>
                       <p className={`text-[10px] font-medium ${isOnline ? 'text-green-600' : 'text-gray-500'}`}>
                         {isOnline ? 'Online' : 'Offline'}
                       </p>
@@ -373,7 +373,7 @@ export default function SettingsPage() {
         <div className="flex gap-3">
           <button
             onClick={handleOpenWifiModal}
-            className="flex-1 bg-[#5c6b54] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#4a5743] transition-colors flex items-center justify-center gap-2 shadow-sm"
+            className="flex-1 bg-[#8c7462] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#4a5743] transition-colors flex items-center justify-center gap-2 shadow-sm"
           >
             <span className="material-symbols-outlined text-sm">sync</span> Ganti Jaringan
           </button>
@@ -574,7 +574,7 @@ export default function SettingsPage() {
 
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={() => setIsChangeWifiOpen(false)} className="flex-1 bg-white border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-50">Batal</button>
-                <button type="submit" className="flex-1 bg-[#5c6b54] text-white py-2.5 rounded-xl text-sm font-bold hover:bg-[#4a5743]">Update WiFi</button>
+                <button type="submit" className="flex-1 bg-[#8c7462] text-white py-2.5 rounded-xl text-sm font-bold hover:bg-[#4a5743]">Update WiFi</button>
               </div>
             </form>
           </div>

@@ -19,11 +19,11 @@ export default function SmartAutomation() {
             <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm transition-all hover:shadow-md">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-[#eefcf4] rounded-2xl flex items-center justify-center shadow-inner">
-                            <span className="material-symbols-outlined text-[#2d6a4f] text-3xl">shield_moon</span>
+                        <div className="w-14 h-14 bg-[#f4ebe1] rounded-2xl flex items-center justify-center shadow-inner">
+                            <span className="material-symbols-outlined text-[#735d4d] text-3xl">shield_moon</span>
                         </div>
                         <div>
-                            <h2 className="font-black text-[#1b4332] text-2xl tracking-tight">Mold Prevention</h2>
+                            <h2 className="font-black text-[#624633] text-2xl tracking-tight">Mold Prevention</h2>
                             <p className="text-xs text-gray-500 font-medium">Otomasi pencegahan jamur & kontrol sirkulasi</p>
                         </div>
                     </div>
@@ -34,7 +34,7 @@ export default function SmartAutomation() {
                             onChange={(e) => setIsScheduleActive(e.target.checked)} 
                             className="sr-only peer" 
                         />
-                        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#5c6b54]"></div>
+                        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#8c7462]"></div>
                     </label>
                 </div>
 
@@ -53,7 +53,7 @@ export default function SmartAutomation() {
             {/* 2. TIMER SEKALI PAKAI */}
             <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm transition-all hover:shadow-md">
                 <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-[#f4f5f0] flex items-center justify-center text-[#8c7462]">
+                    <div className="w-10 h-10 rounded-full bg-[#f8f5f1] flex items-center justify-center text-[#8c7462]">
                         <span className="material-symbols-outlined">hourglass_top</span>
                     </div>
                     <div>
@@ -67,7 +67,7 @@ export default function SmartAutomation() {
                 </div>
                 <div className="space-y-4">
                     <input type="range" min="0" max="12" value={timerHours} onChange={(e) => setTimerHours(e.target.value)} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#8c7462]" />
-                    <input type="range" min="0" max="59" value={timerMinutes} onChange={(e) => setTimerMinutes(e.target.value)} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#5c6b54]" />
+                    <input type="range" min="0" max="59" value={timerMinutes} onChange={(e) => setTimerMinutes(e.target.value)} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#8c7462]" />
                 </div>
             </section>
 
@@ -75,11 +75,11 @@ export default function SmartAutomation() {
             <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm transition-all hover:shadow-md">
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#ecfdf5] flex items-center justify-center text-[#10b981]">
+                        <div className="w-10 h-10 rounded-full bg-[#f4ebe1] flex items-center justify-center text-[#8c7462]">
                             <span className="material-symbols-outlined">cyclone</span>
                         </div>
                         <div>
-                            <h2 className="font-bold text-[#1b4332] text-xl">Auto Air Circulation</h2>
+                            <h2 className="font-bold text-[#624633] text-xl">Auto Air Circulation</h2>
                             <p className="text-xs text-gray-500">Kontrol otomatis berdasarkan kelembapan</p>
                         </div>
                     </div>
@@ -90,7 +90,7 @@ export default function SmartAutomation() {
                             checked={isClimateActive}
                             onChange={(e) => setIsClimateActive(e.target.checked)}
                         />
-                        <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#52b788]"></div>
+                        <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#8c7462]"></div>
                     </label>
                 </div>
 
@@ -98,7 +98,7 @@ export default function SmartAutomation() {
                     <div>
                         <div className="flex justify-between mb-4">
                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Kelembapan Aman</span>
-                            <span className="text-sm font-black text-[#1b4332]">{tempThreshold}% RH</span>
+                            <span className="text-sm font-black text-[#624633]">{tempThreshold}% RH</span>
                         </div>
                         <input 
                             type="range" 
@@ -106,7 +106,7 @@ export default function SmartAutomation() {
                             max="90" 
                             value={tempThreshold}
                             onChange={(e) => setTempThreshold(e.target.value)}
-                            className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-[#52b788]"
+                            className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-[#8c7462]"
                         />
                         <div className="flex justify-between mt-2 text-[8px] font-bold text-gray-400 uppercase">
                             <span>Kering</span>
@@ -118,12 +118,12 @@ export default function SmartAutomation() {
                         <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">Indikator Lampu AI</p>
                         <div className="space-y-3">
                             <div className="flex items-center gap-3">
-                                <div className="w-3 h-3 rounded-full bg-[#10b981]"></div>
-                                <p className="text-xs font-bold text-[#1b4332]">Hijau: Kondisi Aman</p>
+                                <div className="w-3 h-3 rounded-full bg-[#8c7462]"></div>
+                                <p className="text-xs font-bold text-[#624633]">Aman: Kondisi Normal</p>
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="w-3 h-3 rounded-full bg-orange-400 animate-pulse"></div>
-                                <p className="text-xs font-bold text-[#1b4332]">Oranye: Sirkulasi Aktif (Lembap)</p>
+                                <p className="text-xs font-bold text-[#624633]">Oranye: Sirkulasi Aktif (Lembap)</p>
                             </div>
                         </div>
                     </div>

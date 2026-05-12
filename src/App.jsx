@@ -28,17 +28,17 @@ function MainApp() {
       
       {/* Top Navigation Tabs - Updated v2 */}
       <div className="pt-20 px-margin max-w-7xl mx-auto mb-6">
-        <div className="flex justify-between items-center bg-[#f1f8f5] p-1.5 rounded-full border border-green-100 shadow-sm max-w-sm mx-auto">
+        <div className="flex justify-between items-center bg-[#f4ebe1] p-1.5 rounded-full border border-orange-100 shadow-sm max-w-sm mx-auto">
           <button 
             onClick={() => setActiveTab('dashboard')}
-            className={`flex-1 py-2.5 rounded-full text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${activeTab === 'dashboard' ? 'bg-white text-[#1b4332] shadow-sm' : 'text-gray-400 hover:bg-white/50'}`}
+            className={`flex-1 py-2.5 rounded-full text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${activeTab === 'dashboard' ? 'bg-white text-[#624633] shadow-sm' : 'text-gray-400 hover:bg-white/50'}`}
           >
             <span className="material-symbols-outlined text-[18px]">biotech</span>
             Scanner
           </button>
           <button 
             onClick={() => setActiveTab('settings')}
-            className={`flex-1 py-2.5 rounded-full text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${activeTab === 'settings' ? 'bg-[#52b788] text-white shadow-sm' : 'text-gray-400 hover:bg-white/50'}`}
+            className={`flex-1 py-2.5 rounded-full text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${activeTab === 'settings' ? 'bg-[#8c7462] text-white shadow-sm' : 'text-gray-400 hover:bg-white/50'}`}
           >
             <span className="material-symbols-outlined text-[18px]">settings</span>
             Settings
@@ -52,23 +52,23 @@ function MainApp() {
         {activeTab === 'dashboard' && (
           <div className="animate-fade-in">
             {/* DEVICE INDICATOR */}
-            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-r from-[#f1f8f5] to-transparent p-6 rounded-3xl border border-green-100">
+            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-r from-[#f4ebe1] to-transparent p-6 rounded-3xl border border-orange-100">
                <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="material-symbols-outlined text-[#52b788]">radar</span>
-                    <span className="text-[10px] font-black text-[#2d6a4f] tracking-widest uppercase">Scanner Active</span>
+                    <span className="material-symbols-outlined text-[#8c7462]">radar</span>
+                    <span className="text-[10px] font-black text-[#735d4d] tracking-widest uppercase">Scanner Active</span>
                   </div>
-                  <h1 className="text-3xl md:text-4xl font-black text-[#1b4332] tracking-tight">
+                  <h1 className="text-3xl md:text-4xl font-black text-[#624633] tracking-tight">
                      {formatDeviceName(activeDeviceId)}
                   </h1>
                </div>
                <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl border border-gray-100 shadow-sm">
                   <div className="relative flex items-center justify-center w-3 h-3">
-                    {isConnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#52b788] opacity-75"></span>}
-                    <span className={`relative inline-flex rounded-full w-2.5 h-2.5 ${isConnected ? 'bg-[#52b788]' : 'bg-red-500'}`}></span>
+                    {isConnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#8c7462] opacity-75"></span>}
+                    <span className={`relative inline-flex rounded-full w-2.5 h-2.5 ${isConnected ? 'bg-[#8c7462]' : 'bg-red-500'}`}></span>
                   </div>
                   <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                    AI Link: {isConnected ? <span className="text-[#52b788]">Connected</span> : <span className="text-red-500">Lost</span>}
+                    AI Link: {isConnected ? <span className="text-[#8c7462]">Connected</span> : <span className="text-red-500">Lost</span>}
                   </span>
                </div>
             </div>

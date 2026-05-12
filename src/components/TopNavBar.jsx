@@ -32,10 +32,10 @@ export default function TopNavBar({ onProfileClick }) {
     return (
         <header className="fixed top-0 w-full z-50 flex justify-between items-center px-margin h-16 bg-surface/60 backdrop-blur-md shadow-sm">
             <div className="flex items-center gap-base">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#2d6a4f] to-[#52b788] rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-10 h-10 bg-gradient-to-br from-[#735d4d] to-[#8c7462] rounded-xl flex items-center justify-center shadow-lg">
                     <span className="material-symbols-outlined text-white text-2xl">biotech</span>
                 </div>
-                <span className="font-headline-lg text-headline-lg font-black text-[#1b4332] tracking-tight">FungiGuard <span className="text-[#52b788]">AI</span></span>
+                <span className="font-headline-lg text-headline-lg font-black text-[#624633] tracking-tight">FungiGuard <span className="text-[#8c7462]">AI</span></span>
             </div>
             <div className="flex items-center gap-md">
                 <div className="hidden md:flex items-center gap-gutter">
@@ -46,7 +46,7 @@ export default function TopNavBar({ onProfileClick }) {
                     <select 
                         value={activeDeviceId || ''}
                         onChange={(e) => setActiveDeviceId(e.target.value)}
-                        className="appearance-none bg-white border-2 border-green-100 pl-5 pr-12 py-2 rounded-2xl cursor-pointer hover:border-[#52b788] hover:shadow-md transition-all font-black text-[11px] uppercase tracking-wider text-[#1b4332] focus:outline-none focus:ring-4 focus:ring-[#52b788]/10"
+                        className="appearance-none bg-white border-2 border-orange-100 pl-5 pr-12 py-2 rounded-2xl cursor-pointer hover:border-[#8c7462] hover:shadow-md transition-all font-black text-[11px] uppercase tracking-wider text-[#624633] focus:outline-none focus:ring-4 focus:ring-[#8c7462]/10"
                     >
                         {deviceIds.length === 0 && <option value="">Tidak ada alat</option>}
                         {deviceIds.map(id => (
@@ -55,7 +55,7 @@ export default function TopNavBar({ onProfileClick }) {
                             </option>
                         ))}
                     </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-[#52b788]">
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-[#8c7462]">
                         <span className="material-symbols-outlined text-xl">unfold_more</span>
                     </div>
                 </div>
