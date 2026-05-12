@@ -64,11 +64,11 @@ function MainApp() {
                </div>
                <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl border border-gray-100 shadow-sm">
                   <div className="relative flex items-center justify-center w-3 h-3">
-                    {isConnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#8c7462] opacity-75"></span>}
-                    <span className={`relative inline-flex rounded-full w-2.5 h-2.5 ${isConnected ? 'bg-[#8c7462]' : 'bg-red-500'}`}></span>
+                    {isConnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#52b788] opacity-75"></span>}
+                    <span className={`relative inline-flex rounded-full w-2.5 h-2.5 ${isConnected ? 'bg-[#52b788]' : 'bg-red-500'}`}></span>
                   </div>
-                  <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                    AI Link: {isConnected ? <span className="text-[#8c7462]">Connected</span> : <span className="text-red-500">Lost</span>}
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${isConnected ? 'text-[#52b788]' : 'text-gray-500'}`}>
+                    AI Link: {isConnected ? <span className="text-[#52b788]">Connected</span> : <span className="text-red-500">Lost</span>}
                   </span>
                </div>
             </div>

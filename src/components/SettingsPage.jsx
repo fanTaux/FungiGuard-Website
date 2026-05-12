@@ -317,8 +317,8 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-1 mt-0.5">
                       <span className="text-[10px] text-gray-400 font-bold uppercase">{device.deviceId}</span>
                       <span className="mx-1 text-gray-300">•</span>
-                      <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-orange-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]' : 'bg-gray-300'}`}></span>
-                      <p className={`text-[10px] font-medium ${isOnline ? 'text-green-600' : 'text-gray-500'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-[#52b788] shadow-[0_0_5px_rgba(34,197,94,0.5)]' : 'bg-gray-300'}`}></span>
+                      <p className={`text-[10px] font-medium ${isOnline ? 'text-[#52b788]' : 'text-gray-500'}`}>
                         {isOnline ? 'Online' : 'Offline'}
                       </p>
                     </div>
@@ -356,7 +356,7 @@ export default function SettingsPage() {
       <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-6 relative overflow-hidden">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-[#eef3ea] flex items-center justify-center text-[#667b68]">
+            <div className="w-10 h-10 rounded-full bg-[#f4ebe1] flex items-center justify-center text-[#8c7462]">
               <span className="material-symbols-outlined">wifi</span>
             </div>
             <div>
