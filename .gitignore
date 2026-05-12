@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+backend/sleepwell.db
+backend/sleepwell.db-journal
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
