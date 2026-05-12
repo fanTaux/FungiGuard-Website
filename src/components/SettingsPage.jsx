@@ -220,7 +220,7 @@ export default function SettingsPage() {
             <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${isAdmin ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
               {user?.role}
             </span>
-            <span className="text-sm font-bold text-[#624633]">{user?.name}</span>
+            <span className="text-sm font-bold text-[#624633]">{user?.name?.replace('SleepWell', 'FungiGuard')}</span>
           </div>
         </div>
       </div>
@@ -251,7 +251,7 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-[#624633] text-sm">{u.name}</span>
+                    <span className="font-bold text-[#624633] text-sm">{u.name?.replace('SleepWell', 'FungiGuard')}</span>
                     <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${u.role === 'ADMIN' ? 'bg-orange-50 text-orange-600 border border-orange-100' : 'bg-gray-50 text-gray-500'}`}>{u.role}</span>
                   </div>
                   <p className="text-xs text-gray-500">@{u.username}</p>
