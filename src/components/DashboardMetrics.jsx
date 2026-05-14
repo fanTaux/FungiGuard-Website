@@ -2,15 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
 
 export default function DashboardMetrics() {
-    const { state, espLastSeen, isConnected, token, activeDeviceId, devices } = useAppContext();
+    const { state, espLastSeen, isConnected, token, activeDeviceId, devices, isDeviceOnline } = useAppContext();
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState(0);
     const [scanDuration, setScanDuration] = useState(15);
     const [scanLocation, setScanLocation] = useState('');
-    const [customLocation, setCustomLocation] = useState('');
     const [scanNotes, setScanNotes] = useState('');
     const [scanHistory, setScanHistory] = useState([]);
     const [selectedScan, setSelectedScan] = useState(null);
+    const [scanToDelete, setScanToDelete] = useState(null);
     const [historyLoading, setHistoryLoading] = useState(false);
     const [scanResult, setScanResult] = useState(null);
     const [predictionSamples, setPredictionSamples] = useState([]);
@@ -20,44 +20,40 @@ export default function DashboardMetrics() {
     const tempRef = useRef(0);
     const humRef = useRef(0);
     const scanLocationRef = useRef('');
-    const customLocationRef = useRef('');
     const scanNotesRef = useRef('');
     const activeDeviceIdRef = useRef(null);
     const devicesRef = useRef({});
     const tokenRef = useRef(null);
     const timerRef = useRef(null);
 
-    const locations = ['Tembok', 'Lemari', 'Bawah Kasur', 'Elektronik', 'Gudang', 'Area Kayu', 'Lainnya'];
+
     const durations = [15, 30, 60];
 
     const host = window.location.hostname || 'localhost';
     const API_URL = `http://${host}:3000`;
 
-    const ESP_TIMEOUT = 15000;
-    const now = Date.now();
-    const espIsAlive = espLastSeen > 0 && (now - espLastSeen < ESP_TIMEOUT);
 
     const [dummyTemp, setDummyTemp] = useState(27.4);
     const [dummyHum, setDummyHum] = useState(65);
 
     useEffect(() => {
-        if (!espIsAlive) {
+        if (!isDeviceOnline) {
             const interval = setInterval(() => {
                 setDummyTemp(prev => prev + (Math.random() * 0.4 - 0.2));
                 setDummyHum(prev => Math.round(prev + (Math.random() * 2 - 1)));
             }, 3000);
             return () => clearInterval(interval);
         }
-    }, [espIsAlive]);
+    }, [isDeviceOnline]);
 
-    const temp = espIsAlive ? (state.dht?.temperature || 0) : dummyTemp;
-    const hum = espIsAlive ? (state.dht?.humidity || 0) : dummyHum;
+    const { system, dht, ldr } = state;
+    const temp = isDeviceOnline ? (dht?.temperature || 0) : dummyTemp;
+    const hum = isDeviceOnline ? (dht?.humidity || 0) : dummyHum;
 
     // Sync semua nilai ke refs setiap render
     useEffect(() => { tempRef.current = temp; }, [temp]);
     useEffect(() => { humRef.current = hum; }, [hum]);
     useEffect(() => { scanLocationRef.current = scanLocation; }, [scanLocation]);
-    useEffect(() => { customLocationRef.current = customLocation; }, [customLocation]);
     useEffect(() => { scanNotesRef.current = scanNotes; }, [scanNotes]);
     useEffect(() => { activeDeviceIdRef.current = activeDeviceId; }, [activeDeviceId]);
     useEffect(() => { devicesRef.current = devices; }, [devices]);
@@ -92,6 +88,37 @@ export default function DashboardMetrics() {
             if (data.ok) setScanHistory(data.scans);
         } catch (e) { console.error('Fetch history err:', e); }
         finally { setHistoryLoading(false); }
+    };
+
+    const confirmDelete = (e, id) => {
+        e.stopPropagation();
+        setScanToDelete(id);
+    };
+
+    const performDelete = async () => {
+        if (!scanToDelete) return;
+        const id = scanToDelete;
+        
+        try {
+            console.log('[DEBUG] Mengirim request DELETE ke:', `${API_URL}/api/scans/${id}`);
+            const res = await fetch(`${API_URL}/api/scans/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${tokenRef.current}` }
+            });
+            const data = await res.json();
+            console.log('[DEBUG] Respon hapus:', data);
+            
+            if (data.ok) {
+                setScanHistory(prev => prev.filter(s => s.id !== id));
+            } else {
+                alert('Gagal menghapus: ' + (data.error || 'Unknown error'));
+            }
+        } catch (err) {
+            console.error('[DEBUG] Delete scan error:', err);
+            alert('Terjadi kesalahan jaringan: ' + err.message);
+        } finally {
+            setScanToDelete(null);
+        }
     };
 
     // Fetch history saat pertama mount atau activeDeviceId berubah — kirim nilai langsung
@@ -130,40 +157,46 @@ export default function DashboardMetrics() {
 
 
 
+    // Menjalankan interval scan
     useEffect(() => {
         if (isScanning) {
             const durationMs = scanDuration * 1000;
             const interval = durationMs / 100;
+            
             const timer = setInterval(() => {
                 setScanProgress(prev => {
                     const next = prev + 1;
                     if (next >= 100) {
                         clearInterval(timer);
-                        setIsScanning(false);
-                        
-                        // HITUNG VOTING MAYORITAS pakai REF (tidak stale)
-                        const insight = finalizeScanResultFromRefs();
-                        console.log('[SCANNER] Scan Selesai!', insight);
-                        saveScanResultFromRefs(insight).then(() => {
-                            // Beri jeda sedikit agar DB stabil baru fetch ulang
-                            setTimeout(() => fetchHistory(activeDeviceIdRef.current, tokenRef.current), 500);
-                        });
-                        
                         return 100;
                     }
                     return next;
                 });
             }, interval);
+            
             timerRef.current = timer;
             return () => clearInterval(timer);
         }
     }, [isScanning, scanDuration]);
 
+    // Menangani aksi setelah scan selesai
+    useEffect(() => {
+        if (isScanning && scanProgress === 100) {
+            setIsScanning(false);
+            const insight = finalizeScanResultFromRefs();
+            console.log('[SCANNER] Scan Selesai!', insight);
+            
+            saveScanResultFromRefs(insight).then(() => {
+                setTimeout(() => fetchHistory(activeDeviceIdRef.current, tokenRef.current), 500);
+            });
+        }
+    }, [scanProgress, isScanning]);
+
     // Versi dari REFS — aman dipanggil dari timer closure
     const finalizeScanResultFromRefs = () => {
         const samples = predictionSamplesRef.current;
         const currentHum = humRef.current;
-        const locName = scanLocationRef.current === 'Lainnya' ? customLocationRef.current : scanLocationRef.current;
+        const locName = scanLocationRef.current;
 
         let finalRisk = 0;
         if (samples.length > 0) {
@@ -175,13 +208,33 @@ export default function DashboardMetrics() {
         }
 
         const riskPercent = { 0: 15, 1: 50, 2: 90 }[finalRisk] ?? 15;
+        
+        const loc = locName || 'Area ini';
+        const lowMsgs = [
+            `Sip, ${loc} terpantau aman! Bebas dari ancaman lembap dan jamur.`,
+            `Kondisi di ${loc} sangat ideal. Barang-barang Anda aman disimpan di sini.`,
+            `Kabar baik! ${loc} kering dan bersih. Pertahankan sirkulasi udaranya ya.`,
+            `Tidak ada indikasi bahaya di ${loc}. Suhu dan kelembapan sangat pas.`
+        ];
+        const medMsgs = [
+            `Wah, ${loc} berisiko nih. Kelembapannya lumayan tinggi, mending kasih ventilasi ekstra.`,
+            `Hati-hati, sirkulasi udara di ${loc} kurang baik dan berisiko memicu jamur.`,
+            `Status Waspada! ${loc} mulai berisiko lembap. Sebaiknya hindari menyimpan barang sensitif di sini.`,
+            `Area ${loc} sedikit berisiko. Rutin cek apakah ada kebocoran atau udara yang terperangkap.`
+        ];
+        const highMsgs = [
+            `Bahaya! ${loc} sangat lembap. Tolong jangan taruh barang yang mudah berjamur di sini ya!`,
+            `Risiko tinggi pada ${loc}! Segera bersihkan dengan cairan antifungal dan pasang penyerap lembap.`,
+            `Area ${loc} zona merah! Kondisinya sangat mendukung jamur tumbuh subur. Pindahkan barang kulit/kain segera.`,
+            `Awas! Udara di ${loc} terlalu lembap dan pengap. Sangat berisiko merusak barang-barang berharga Anda.`
+        ];
+        
+        const getRand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
         const labels = [
-            { level: 'Rendah', color: 'text-orange-500', bg: 'bg-orange-50', icon: 'check_circle',
-              desc: `Area ${locName} relatif aman. Kondisi lingkungan bersih dan tidak mendukung pertumbuhan jamur.` },
-            { level: 'Waspada', color: 'text-orange-500', bg: 'bg-orange-50', icon: 'error',
-              desc: `Area ${locName} terdeteksi cukup lembap. Tingkatkan ventilasi dan periksa kebocoran secara berkala.` },
-            { level: 'Bahaya', color: 'text-red-600', bg: 'bg-red-50', icon: 'warning',
-              desc: `Risiko tinggi pada ${locName}! Segera bersihkan dengan cairan antifungal dan kurangi kelembapan.` },
+            { level: 'Aman', color: 'text-green-600', bg: 'bg-green-50', icon: 'check_circle', desc: getRand(lowMsgs) },
+            { level: 'Berisiko', color: 'text-orange-500', bg: 'bg-orange-50', icon: 'error', desc: getRand(medMsgs) },
+            { level: 'Bahaya', color: 'text-red-600', bg: 'bg-red-50', icon: 'warning', desc: getRand(highMsgs) },
         ];
 
         const insight = {
@@ -200,9 +253,7 @@ export default function DashboardMetrics() {
         if (!targetId && Object.keys(devicesRef.current).length > 0)
             targetId = Object.keys(devicesRef.current)[0];
 
-        const finalLocation = scanLocationRef.current === 'Lainnya'
-            ? customLocationRef.current
-            : scanLocationRef.current;
+        const finalLocation = scanLocationRef.current;
 
         const scanData = {
             deviceId: targetId,
@@ -275,40 +326,25 @@ export default function DashboardMetrics() {
                                 <span className="material-symbols-outlined text-3xl font-bold">query_stats</span>
                             </div>
                             <div>
-                                <h2 className="font-black text-[#624633] text-2xl tracking-tight uppercase">Mold AI Scanner</h2>
+                                <h2 className="font-black text-[#624633] text-2xl tracking-tight uppercase">Mold Smart Scanner</h2>
                                 <p className="text-xs text-gray-400 font-bold tracking-widest">SETUP ANALISIS AREA</p>
                             </div>
                         </div>
 
-                        {/* STEP 1: LOCATION */}
                         <div className="mb-8">
                             <div className="flex items-center gap-2 mb-4">
                                 <span className="w-6 h-6 rounded-full bg-[#624633] text-white text-[10px] font-black flex items-center justify-center">1</span>
-                                <h3 className="text-xs font-black text-[#624633] uppercase tracking-wider">Pilih Lokasi Objek</h3>
+                                <h3 className="text-xs font-black text-[#624633] uppercase tracking-wider">Lokasi Objek</h3>
                             </div>
-                            <div className="flex flex-wrap gap-2">
-                                {locations.map(loc => (
-                                    <button 
-                                        key={loc}
-                                        onClick={() => setScanLocation(loc)}
-                                        className={`px-4 py-2.5 rounded-xl text-[10px] font-black transition-all border-2 ${scanLocation === loc ? 'bg-[#624633] text-white border-[#624633] shadow-lg' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}`}
-                                    >
-                                        {loc}
-                                    </button>
-                                ))}
+                            <div className="animate-fade-in">
+                                <input 
+                                    type="text"
+                                    value={scanLocation}
+                                    onChange={(e) => setScanLocation(e.target.value)}
+                                    placeholder="Isi dimana? (misal: Kamar Mandi, Lemari, dll)..."
+                                    className="w-full bg-[#f4ebe1] border-2 border-[#8c7462]/20 rounded-xl px-4 py-3 text-xs font-bold text-[#624633] focus:border-[#8c7462] focus:outline-none transition-all"
+                                />
                             </div>
-                            
-                            {scanLocation === 'Lainnya' && (
-                                <div className="mt-4 animate-fade-in">
-                                    <input 
-                                        type="text"
-                                        value={customLocation}
-                                        onChange={(e) => setCustomLocation(e.target.value)}
-                                        placeholder="Ketik lokasi (misal: Kamar Mandi)..."
-                                        className="w-full bg-[#f4ebe1] border-2 border-[#8c7462]/20 rounded-xl px-4 py-3 text-xs font-bold text-[#624633] focus:border-[#8c7462] focus:outline-none transition-all"
-                                    />
-                                </div>
-                            )}
                         </div>
 
                         {/* STEP 2: NOTES & DURATION */}
@@ -368,7 +404,7 @@ export default function DashboardMetrics() {
                                             </div>
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-white font-black text-lg tracking-widest uppercase animate-pulse">AI Scanning In Progress</p>
+                                            <p className="text-white font-black text-lg tracking-widest uppercase animate-pulse">Scanning In Progress</p>
                                             <p className="text-green-300/60 text-xs font-bold mt-2 uppercase tracking-widest">{scanLocation} • {scanDuration}s</p>
                                         </div>
                                         {/* Animated dots */}
@@ -391,11 +427,11 @@ export default function DashboardMetrics() {
 
                             <button 
                                 onClick={startScan}
-                                disabled={!scanLocation || (scanLocation === 'Lainnya' && !customLocation) || isScanning}
-                                className={`w-full py-5 rounded-3xl font-black text-xs uppercase tracking-[0.3em] shadow-xl transition-all flex items-center justify-center gap-3 ${(!scanLocation || (scanLocation === 'Lainnya' && !customLocation) || isScanning) ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-[#624633] hover:bg-[#735d4d] text-white active:scale-95 shadow-orange-900/20'}`}
+                                disabled={!scanLocation || isScanning}
+                                className={`w-full py-5 rounded-3xl font-black text-xs uppercase tracking-[0.3em] shadow-xl transition-all flex items-center justify-center gap-3 ${(!scanLocation || isScanning) ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-[#624633] hover:bg-[#735d4d] text-white active:scale-95 shadow-orange-900/20'}`}
                             >
                                 <span className="material-symbols-outlined">analytics</span>
-                                Mulai Analisis AI
+                                Mulai Analisis Pintar
                             </button>
                         </div>
                     </div>
@@ -478,7 +514,7 @@ export default function DashboardMetrics() {
                                     <div className={`w-10 h-10 rounded-xl ${scanResult.bg} flex items-center justify-center shadow-inner border border-white`}>
                                         <span className={`material-symbols-outlined ${scanResult.color}`}>{scanResult.icon}</span>
                                     </div>
-                                    <h4 className={`font-black text-[10px] uppercase tracking-[0.2em] ${scanResult.color}`}>AI Scan Complete</h4>
+                                    <h4 className={`font-black text-[10px] uppercase tracking-[0.2em] ${scanResult.color}`}>Hasil Analisis</h4>
                                 </div>
                                 <p className="text-lg font-black text-[#624633] mb-1 leading-tight">{scanResult.level}!</p>
                                 <p className="text-xs font-bold text-[#624633]/70 leading-relaxed">{scanResult.desc}</p>
@@ -490,7 +526,7 @@ export default function DashboardMetrics() {
                                  <span className="material-symbols-outlined text-3xl">biotech</span>
                              </div>
                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Menunggu Pemindaian</p>
-                             <p className="text-[10px] text-gray-300 mt-2">Silakan pilih lokasi dan durasi untuk memulai analisis AI.</p>
+                             <p className="text-[10px] text-gray-300 mt-2">Silakan isi lokasi dan pilih durasi untuk memulai analisis.</p>
                         </div>
                     )}
                 </div>
@@ -498,9 +534,7 @@ export default function DashboardMetrics() {
             </div>
             {/* LIVE DEVICE LOGS (FOOTER SECTION) */}
             <div className="mt-12 bg-[#624633] rounded-[2.5rem] p-8 shadow-2xl border-4 border-white overflow-hidden relative">
-                <div className="absolute top-0 right-0 p-8 opacity-10">
-                    <span className="material-symbols-outlined text-9xl text-white">terminal</span>
-                </div>
+
                 
                 <div className="flex items-center justify-between mb-6 relative z-10">
                     <div className="flex items-center gap-4">
@@ -512,9 +546,11 @@ export default function DashboardMetrics() {
                             <p className="text-[10px] font-bold text-green-300/50 uppercase tracking-[0.2em]">Raw MQTT Data Stream</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-orange-500/10 rounded-full border border-orange-500/20">
-                        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                        <span className="text-[10px] font-black text-green-400 uppercase tracking-widest">ESP32 Connected</span>
+                    <div className={`flex items-center gap-2 px-4 py-2 rounded-full border ${isDeviceOnline ? 'bg-orange-500/10 border-orange-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
+                        <span className={`w-2 h-2 rounded-full ${isDeviceOnline ? 'bg-green-400 animate-pulse' : 'bg-red-500'}`}></span>
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${isDeviceOnline ? 'text-green-400' : 'text-red-500'}`}>
+                            {isDeviceOnline ? 'ESP32 Connected' : 'ESP32 Offline'}
+                        </span>
                     </div>
                 </div>
 
@@ -537,21 +573,6 @@ export default function DashboardMetrics() {
                         <span className="w-24">--:--:--</span>
                         <span className="w-32">/system/log</span>
                         <span>Waiting for next hardware heartbeat...</span>
-                    </div>
-                </div>
-                
-                <div className="mt-6 flex items-center gap-6 relative z-10">
-                    <div className="flex items-center gap-2">
-                        <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Protocol:</span>
-                        <span className="text-[9px] font-black text-green-400 uppercase">MQTTS (Secure)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Baud Rate:</span>
-                        <span className="text-[9px] font-black text-green-400 uppercase">9600 bps</span>
-                    </div>
-                    <div className="flex items-center gap-2 ml-auto">
-                        <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Broker:</span>
-                        <span className="text-[9px] font-black text-green-400 uppercase">HiveMQ Cloud</span>
                     </div>
                 </div>
             </div>
@@ -600,7 +621,7 @@ export default function DashboardMetrics() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <span className="px-2 py-0.5 bg-[#624633] text-white text-[9px] font-black rounded-lg uppercase">{scan.location}</span>
+                                            <span className="px-2 py-0.5 bg-[#624633] text-white text-[9px] font-black rounded-lg uppercase">{scan.location || 'Area'}</span>
                                             <span className="text-[9px] text-gray-300 font-bold">{date}</span>
                                         </div>
                                         <p className="text-xs font-bold text-[#624633] truncate">{scan.message}</p>
@@ -610,7 +631,16 @@ export default function DashboardMetrics() {
                                             <span>⏱ {scan.duration}s</span>
                                         </div>
                                     </div>
-                                    <span className="material-symbols-outlined text-gray-200 group-hover:text-[#624633] transition-colors">chevron_right</span>
+                                    <div className="flex flex-col gap-2 relative z-20">
+                                        <button 
+                                            onClick={(e) => confirmDelete(e, scan.id)}
+                                            className="p-3 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm border border-red-100 flex items-center justify-center"
+                                            title="Hapus Riwayat"
+                                        >
+                                            <span className="material-symbols-outlined text-base">delete</span>
+                                        </button>
+                                        <span className="material-symbols-outlined text-gray-200 group-hover:text-[#624633] transition-colors self-center">chevron_right</span>
+                                    </div>
                                 </div>
                             );
                         })}
@@ -627,8 +657,8 @@ export default function DashboardMetrics() {
                                 className="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all">
                                 <span className="material-symbols-outlined text-sm">close</span>
                             </button>
-                            <span className="text-[9px] font-black text-green-300/60 uppercase tracking-widest">Detail Analisis AI</span>
-                            <h2 className="text-2xl font-black mt-1">{selectedScan.location}</h2>
+                            <span className="text-[9px] font-black text-green-300/60 uppercase tracking-widest">Detail Analisis</span>
+                            <h2 className="text-2xl font-black mt-1">{selectedScan.location || 'Area'}</h2>
                             <p className="text-[10px] text-green-300/50 mt-1">
                                 {new Date(selectedScan.timestamp).toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' })}
                             </p>
@@ -652,7 +682,7 @@ export default function DashboardMetrics() {
                             </div>
                             {/* Diagnosis */}
                             <div className="bg-[#f8fafc] p-5 rounded-2xl">
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Diagnosis AI</p>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Diagnosis Hasil</p>
                                 <p className="text-sm font-bold text-[#624633] leading-relaxed">{selectedScan.message}</p>
                                 {selectedScan.notes && (
                                     <div className="mt-3 pt-3 border-t border-gray-200">
@@ -698,6 +728,35 @@ export default function DashboardMetrics() {
                             <button onClick={() => setSelectedScan(null)}
                                 className="flex-1 py-3 bg-[#624633] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#735d4d] transition-all">
                                 Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* DELETE CONFIRMATION MODAL */}
+            {scanToDelete && (
+                <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-[#624633]/60 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden text-center animate-bounce-in p-8 border-4 border-red-50">
+                        <div className="w-20 h-20 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                            <span className="material-symbols-outlined text-4xl">delete_forever</span>
+                        </div>
+                        <h2 className="text-xl font-black text-[#624633] mb-2">Hapus Riwayat?</h2>
+                        <p className="text-xs font-bold text-gray-400 mb-8">
+                            Tindakan ini tidak bisa dibatalkan. Riwayat pemindaian ini akan hilang dari database.
+                        </p>
+                        <div className="flex gap-4">
+                            <button 
+                                onClick={() => setScanToDelete(null)}
+                                className="flex-1 py-4 bg-gray-100 text-gray-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all"
+                            >
+                                Batal
+                            </button>
+                            <button 
+                                onClick={performDelete}
+                                className="flex-1 py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-600 shadow-lg shadow-red-500/30 transition-all active:scale-95"
+                            >
+                                Ya, Hapus
                             </button>
                         </div>
                     </div>

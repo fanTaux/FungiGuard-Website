@@ -195,7 +195,7 @@ mqttBridge.onSensorData((deviceId, data) => {
   if (data.wifi_ssid) dState.wifi_ssid = data.wifi_ssid;
   if (typeof data.rssi !== 'undefined') dState.rssi = data.rssi;
   
-  dState.lastUpdate = new Date().toISOString();
+  dState.lastUpdate = Date.now();
   broadcast('device_update', deviceId, dState); 
 });
 
@@ -218,6 +218,7 @@ mqttBridge.onStatusData((deviceId, data) => {
       console.log(`[MQTT] 📶 WiFi list diterima: ${data.wifi_list.length} jaringan`);
   }
 
+  dState.lastUpdate = Date.now();
   broadcast('device_status', deviceId, dState);
 });
 
@@ -274,11 +275,19 @@ app.post('/api/scans', authenticate, (req, res) => {
 });
 
 app.delete('/api/scans/:id', authenticate, (req, res) => {
+    const { id } = req.params;
+    console.log(`[API] 🗑️ Mencoba menghapus scan ID: ${id}`);
     try {
-        const { id } = req.params;
-        db.prepare('DELETE FROM scan_history WHERE id = ?').run(id);
-        res.json({ ok: true, message: 'Riwayat berhasil dihapus' });
+        const info = db.prepare('DELETE FROM scan_history WHERE id = ?').run(id);
+        if (info.changes > 0) {
+            console.log(`[API] ✅ Berhasil menghapus scan ID: ${id}`);
+            res.json({ ok: true, message: 'Riwayat berhasil dihapus' });
+        } else {
+            console.warn(`[API] ⚠️ Scan ID ${id} tidak ditemukan`);
+            res.status(404).json({ ok: false, error: 'Data tidak ditemukan' });
+        }
     } catch (e) {
+        console.error(`[API] ❌ Gagal menghapus scan ID ${id}:`, e.message);
         res.status(500).json({ ok: false, error: e.message });
     }
 });
@@ -320,8 +329,16 @@ app.post('/api/users', authenticate, isAdmin, async (req, res) => {
 });
 
 app.delete('/api/users/:id', authenticate, isAdmin, async (req, res) => {
-  User.delete(req.params.id);
-  res.json({ ok: true, message: 'User berhasil dihapus' });
+  try {
+    const userToDelete = User.findOne({ id: req.params.id });
+    if (userToDelete && userToDelete.username === 'admin') {
+      return res.status(403).json({ ok: false, error: 'Akun Master Admin tidak boleh dihapus!' });
+    }
+    User.delete(req.params.id);
+    res.json({ ok: true, message: 'User berhasil dihapus' });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'Terjadi kesalahan sistem' });
+  }
 });
 
 app.get('/api/devices', authenticate, async (req, res) => {

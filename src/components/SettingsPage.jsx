@@ -41,11 +41,11 @@ export default function SettingsPage() {
   const isAdmin = user?.role === 'ADMIN';
 
   const getSignalInfo = (rssi) => {
-    if (!rssi || rssi === 0) return { text: 'N/A', icon: 'signal_wifi_0_bar', color: 'text-gray-400' };
-    if (rssi > -50) return { text: 'Sangat Kuat', icon: 'signal_wifi_4_bar', color: 'text-[#667b68]' };
-    if (rssi > -65) return { text: 'Kuat', icon: 'signal_wifi_4_bar', color: 'text-[#667b68]' };
-    if (rssi > -75) return { text: 'Cukup', icon: 'signal_wifi_3_bar', color: 'text-orange-400' };
-    return { text: 'Lemah', icon: 'signal_wifi_1_bar', color: 'text-red-400' };
+    if (!rssi || rssi === 0) return { text: 'N/A', icon: 'wifi_off', color: 'text-gray-400' };
+    if (rssi > -50) return { text: 'Sangat Kuat', icon: 'wifi', color: 'text-[#667b68]' };
+    if (rssi > -65) return { text: 'Kuat', icon: 'wifi', color: 'text-[#667b68]' };
+    if (rssi > -75) return { text: 'Cukup', icon: 'wifi', color: 'text-orange-400' };
+    return { text: 'Lemah', icon: 'wifi', color: 'text-red-400' };
   };
   const signal = getSignalInfo(state?.rssi);
 
@@ -272,9 +272,11 @@ export default function SettingsPage() {
                       <button onClick={() => handleAction('edit', u)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-[#f8f5f1] flex items-center gap-2 font-medium">
                         <span className="material-symbols-outlined text-[16px] text-[#8c7462]">edit</span> Edit
                       </button>
-                      <button onClick={() => handleAction('delete', u)} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium">
-                        <span className="material-symbols-outlined text-[16px]">delete</span> Hapus
-                      </button>
+                      {u.username !== 'admin' && (
+                        <button onClick={() => handleAction('delete', u)} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium">
+                          <span className="material-symbols-outlined text-[16px]">delete</span> Hapus
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
