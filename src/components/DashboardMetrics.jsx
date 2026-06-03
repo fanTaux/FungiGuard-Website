@@ -33,22 +33,10 @@ export default function DashboardMetrics() {
     const API_URL = `http://${host}:3000`;
 
 
-    const [dummyTemp, setDummyTemp] = useState(27.4);
-    const [dummyHum, setDummyHum] = useState(65);
-
-    useEffect(() => {
-        if (!isDeviceOnline) {
-            const interval = setInterval(() => {
-                setDummyTemp(prev => prev + (Math.random() * 0.4 - 0.2));
-                setDummyHum(prev => Math.round(prev + (Math.random() * 2 - 1)));
-            }, 3000);
-            return () => clearInterval(interval);
-        }
-    }, [isDeviceOnline]);
-
     const { system, dht, ldr } = state;
-    const temp = isDeviceOnline ? (dht?.temperature || 0) : dummyTemp;
-    const hum = isDeviceOnline ? (dht?.humidity || 0) : dummyHum;
+    const temp = dht?.temperature || 0;
+    const hum = dht?.humidity || 0;
+
 
     // Sync semua nilai ke refs setiap render
     useEffect(() => { tempRef.current = temp; }, [temp]);
@@ -291,7 +279,6 @@ export default function DashboardMetrics() {
         }
     };
 
-    const currentRiskValue = typeof state.aiRisk !== 'undefined' ? { 0: 15, 1: 50, 2: 90 }[state.aiRisk] : (hum > 70 ? 90 : hum > 50 ? 50 : 15);
 
     return (
         <div className="space-y-6">
@@ -461,25 +448,7 @@ export default function DashboardMetrics() {
                                 <p className="text-2xl font-black text-[#624633]">{state.ldr || 0}</p>
                             </div>
                         </div>
-                        
-                        {/* REAL-TIME PREDICTION GAUGE (SMALL) */}
-                        <div className="mt-6 pt-6 border-t border-gray-50 flex items-center justify-between">
-                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Real-time Risk</span>
-                             <div className="flex items-center gap-2">
-                                <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                    <div 
-                                        className="h-full transition-all duration-500" 
-                                        style={{ 
-                                            width: `${currentRiskValue}%`,
-                                            backgroundColor: currentRiskValue > 70 ? '#ff4d4d' : currentRiskValue > 40 ? '#f97316' : '#4ade80'
-                                        }}
-                                    ></div>
-                                </div>
-                                <span className={`text-[10px] font-black ${currentRiskValue > 70 ? 'text-red-500' : currentRiskValue > 40 ? 'text-orange-500' : 'text-orange-500'}`}>
-                                    {state.aiLabel || 'WAITING'}
-                                </span>
-                             </div>
-                        </div>
+
                     </div>
 
                     {/* MOLD RISK RESULT (The Voted Result) */}
