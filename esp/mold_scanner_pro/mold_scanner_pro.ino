@@ -22,7 +22,7 @@
 #define LED_PIN 25
 
 // --- IDENTITAS ALAT ---
-const String myDeviceID = "mold-scanner-03";
+const String myDeviceID = "mold-scanner-04";
 
 // --- MQTT HIVEMQ CLOUD ---
 const char* mqtt_server = "4ecff5933a704e218192a9a9390c3580.s1.eu.hivemq.cloud";
@@ -70,7 +70,7 @@ void setup() {
   wm.setConnectTimeout(60);
   wm.setConfigPortalTimeout(180);
 
-  if (!wm.autoConnect("MoldScanner-03")) {
+  if (!wm.autoConnect("MoldScanner-04")) {
     Serial.println("[WIFI] Gagal konek, restart...");
     delay(3000);
     ESP.restart();
